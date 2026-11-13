@@ -41,6 +41,27 @@ The web build talks to `<pc-ip>:4000` automatically, so the backend URL never
 needs to be baked in. The backend must listen on `0.0.0.0` and allow the
 phone's origin in `CORS_ORIGINS`.
 
+## Android demo build (Codemagic)
+
+The `android/` platform lives in this folder. Build a demo APK with:
+
+```bash
+flutter build apk --release
+```
+
+The release manifest includes the `INTERNET` permission and allows cleartext
+HTTP, so the APK can reach the LAN backend at `http://10.160.175.182:4000`
+(override with `--dart-define=LAN_HOST=...`). For a backend that is not on the
+same Wi-Fi, point the app at a public URL instead:
+
+```bash
+flutter build apk --release --dart-define=API_BASE_URL=https://api.example.com
+```
+
+In Codemagic add the same flag to the build step's build arguments. The Gradle
+wrapper (`gradlew`, `gradle-wrapper.jar`) is intentionally not committed;
+Flutter regenerates it from the SDK before the Gradle build runs.
+
 ## Checks
 
 ```bash

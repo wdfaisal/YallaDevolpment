@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:yalla_talabat_customer/core/widgets/app_image.dart';
 import 'package:yalla_talabat_customer/data/models/catalog.dart';
 import 'package:yalla_talabat_customer/presentation/home/widgets/home_banner.dart';
 import 'package:yalla_talabat_customer/presentation/home/widgets/home_best_sellers.dart';
@@ -13,6 +14,7 @@ import 'support/test_app.dart';
 CatalogBanner _banner({
   String titleAr = 'عرض تجريبي',
   String targetType = 'none',
+  String imageUrl = '',
 }) {
   return CatalogBanner(
     id: 'bnr_1',
@@ -20,7 +22,7 @@ CatalogBanner _banner({
     titleEn: 'Demo offer',
     subtitleAr: '',
     subtitleEn: '',
-    imageUrl: '',
+    imageUrl: imageUrl,
     targetType: targetType,
     targetId: null,
     externalUrl: null,
@@ -122,6 +124,32 @@ void main() {
 
       await tester.tap(find.text('اطلب الآن'));
       expect(tapped?.id, banner.id);
+    });
+
+    testWidgets('backend image fills the whole banner surface', (tester) async {
+      final banner = _banner(imageUrl: 'https://example.com/banner.jpg');
+      await tester.pumpWidget(
+        testApp(
+          Scaffold(
+            body: Center(
+              child: SizedBox(
+                width: 440,
+                child: HomeBanner(banners: [banner], onTap: (_) {}),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      final size = tester.getSize(find.byType(HomeBanner));
+      expect(size.width, 440);
+      expect(size.height, closeTo(440 / 2.2, 0.5));
+
+      final image = tester.widget<AppImage>(find.byType(AppImage));
+      expect(image.fit, BoxFit.cover);
+      expect(image.width, double.infinity);
+      expect(image.height, double.infinity);
     });
   });
 
