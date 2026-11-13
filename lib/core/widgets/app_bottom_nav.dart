@@ -5,11 +5,20 @@ import '../design/app_spacing.dart';
 import '../design/app_typography.dart';
 
 class BottomNavItem {
-  const BottomNavItem({required this.label, required this.icon, required this.activeIcon});
+  const BottomNavItem({
+    required this.label,
+    required this.icon,
+    required this.activeIcon,
+    this.activeColor,
+  });
 
   final String label;
   final IconData icon;
   final IconData activeIcon;
+
+  /// Optional per-tab accent for screens whose design uses a different brand
+  /// colour (the account tab uses the profile red).
+  final Color? activeColor;
 }
 
 /// Persistent 4-tab navigation matching the Stitch shell.
@@ -69,7 +78,7 @@ class _NavButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = active ? AppColors.primary : AppColors.secondary;
+    final color = active ? (item.activeColor ?? AppColors.primary) : AppColors.secondary;
     return Semantics(
       button: true,
       selected: active,

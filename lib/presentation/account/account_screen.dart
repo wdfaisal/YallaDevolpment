@@ -9,17 +9,24 @@ import '../../core/design/app_spacing.dart';
 import '../../core/design/app_typography.dart';
 import '../../core/formatting/formatters.dart';
 import '../../core/localization/l10n.dart';
-import '../../core/widgets/app_image.dart';
 import '../../core/widgets/app_scaffold.dart';
+import '../../core/widgets/snack.dart';
 import '../../core/widgets/states.dart';
 import '../../data/models/customer.dart';
 import '../../state/account_controllers.dart';
+import '../../state/address_controller.dart';
 import '../../state/home_controller.dart';
 import '../../state/language_controller.dart';
 import '../../state/session_controller.dart';
-import '../shared/headers.dart';
 import '../shared/sheets.dart';
+import 'widgets/account_footer.dart';
+import 'widgets/account_header.dart';
+import 'widgets/account_menu_section.dart';
+import 'widgets/account_profile_header.dart';
+import 'widgets/account_summary_cards.dart';
 
+/// Account tab rebuilt from the Stitch profile design. Every value comes from
+/// the live backend or the local session; nothing is invented.
 class AccountScreen extends ConsumerWidget {
   const AccountScreen({super.key});
 
@@ -28,503 +35,362 @@ class AccountScreen extends ConsumerWidget {
     final l10n = L10n.of(context);
     final session = ref.watch(sessionProvider);
     return AppScaffold(
+      header: AccountHeader(
+        onShare: () => Share.share(
+          '${l10n.appName} — ${l10n.shareAppMessage}',
+          subject: l10n.appName,
+        ),
+      ),
       body: ListView(
         padding: const EdgeInsets.only(bottom: AppSpacing.xxl),
         children: [
-          _header(context, ref, l10n),
-          const SizedBox(height: AppSpacing.sm),
           session.when(
             skipLoadingOnRefresh: true,
             data: (profile) => profile == null
-                ? _guest(context, l10n)
-                : _profile(context, ref, l10n, profile),
+                ? _GuestAccount(l10n: l10n)
+                : _SignedInAccount(profile: profile),
             loading: () => const Padding(
-              padding: EdgeInsets.all(AppSpacing.xxl),
+              padding: EdgeInsets.all(AppSpacing.xxxl),
               child: LoadingState(),
             ),
-            error: (error, _) => ErrorState(
-              message: error.toString(),
-              onRetry: () => ref.invalidate(sessionProvider),
+            error: (error, _) => Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: ErrorState(
+                message: error.toString(),
+                onRetry: () => ref.invalidate(sessionProvider),
+              ),
             ),
           ),
         ],
       ),
     );
   }
+}
 
-  Widget _header(BuildContext context, WidgetRef ref, L10n l10n) {
-    final unread = ref.watch(unreadNotificationsProvider);
-    final signedIn = ref.watch(isSignedInProvider);
-    return Container(
-      height: 56,
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-      color: AppColors.surfaceContainerLowest,
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(l10n.account, style: AppTypography.headlineSm),
-          ),
-          if (signedIn)
-            HeaderIconButton(
-              icon: Icons.notifications_active_outlined,
-              tooltip: l10n.notifications,
-              badge: unread,
-              onTap: () => context.push('/account/notifications'),
-            ),
-          const SizedBox(width: AppSpacing.xs),
-          HeaderIconButton(
-            icon: Icons.settings_outlined,
-            tooltip: l10n.settings,
-            onTap: () => context.push('/account/settings'),
-          ),
-        ],
-      ),
-    );
-  }
+String _versionLabel(L10n l10n) =>
+    '${l10n.appVersion} ${Env.appVersion} (YallaTalabat v${Env.appVersion})';
 
-  Widget _guest(BuildContext context, L10n l10n) {
-    return Padding(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      child: Container(
-        padding: const EdgeInsets.all(AppSpacing.xl),
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            begin: AlignmentDirectional.topStart,
-            end: AlignmentDirectional.bottomEnd,
-            colors: [AppColors.primary, AppColors.primaryContainer],
-          ),
-          borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
-        ),
-        child: Column(
-          children: [
-            const CircleAvatar(
-              radius: 34,
-              backgroundColor: Colors.white24,
-              child: Icon(Icons.person_outline, size: 34, color: Colors.white),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              l10n.guest,
-              style: AppTypography.headlineSm.copyWith(color: Colors.white),
-            ),
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              l10n.loginSubtitle,
-              textAlign: TextAlign.center,
-              style: AppTypography.bodySm.copyWith(color: Colors.white70),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton(
-                style: FilledButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: AppColors.primary,
-                ),
-                onPressed: () => context.push('/login'),
-                child: Text(l10n.signIn),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _profile(
-    BuildContext context,
-    WidgetRef ref,
-    L10n l10n,
-    CustomerProfile profile,
-  ) {
-    final wallet = ref.watch(walletProvider);
-    final loyalty = ref.watch(loyaltyProvider);
-    final offers = ref.watch(homeProvider).valueOrNull?.offers.length ?? 0;
-    final arabic = l10n.isArabic;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, 0),
-          child: Row(
-            children: [
-              Container(
-                width: 72,
-                height: 72,
-                decoration: BoxDecoration(
-                  color: AppColors.orangeTintSubtle,
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
-                  border: Border.all(color: AppColors.borderMuted),
-                ),
-                clipBehavior: Clip.antiAlias,
-                child: profile.avatarUrl != null
-                    ? AppImage(url: profile.avatarUrl, borderRadius: BorderRadius.zero)
-                    : Center(
-                        child: Text(
-                          profile.initials.isEmpty ? '?' : profile.initials,
-                          style: AppTypography.headlineMd.copyWith(color: AppColors.primary),
-                        ),
-                      ),
-              ),
-              const SizedBox(width: AppSpacing.lg),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      profile.name.isEmpty ? l10n.guest : profile.name,
-                      style: AppTypography.headlineSm,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      profile.phone,
-                      style: AppTypography.bodySm.copyWith(color: AppColors.secondary),
-                      textDirection: TextDirection.ltr,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    if (profile.email != null && profile.email!.isNotEmpty)
-                      Text(
-                        profile.email!,
-                        style: AppTypography.bodySm.copyWith(color: AppColors.secondary),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${l10n.memberSince} ${Fmt.date(profile.memberSince)} · '
-                      '${profile.orderCount} ${l10n.orderCount}',
-                      style: AppTypography.labelSm.copyWith(color: AppColors.secondary),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.edit_outlined, size: 20),
-                tooltip: l10n.editProfile,
-                onPressed: () => context.push('/account/profile'),
-              ),
-            ],
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: Row(
-            children: [
-              Expanded(
-                child: _SummaryCard(
-                  label: l10n.wallet,
-                  value: wallet.when(
-                    data: (w) => Fmt.money(w.availableMinor, currency: w.currency),
-                    loading: () => '—',
-                    error: (_, __) => '—',
-                  ),
-                  icon: Icons.account_balance_wallet_outlined,
-                  color: AppColors.primary,
-                  onTap: () => context.push('/account/wallet'),
-                ),
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              Expanded(
-                child: _SummaryCard(
-                  label: l10n.loyalty,
-                  value: loyalty.when(
-                    data: (l) => '${l.points} ${l10n.points}',
-                    loading: () => '—',
-                    error: (_, __) => '—',
-                  ),
-                  icon: Icons.stars_outlined,
-                  color: AppColors.tertiary,
-                  onTap: () => context.push('/account/loyalty'),
-                ),
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              Expanded(
-                child: _SummaryCard(
-                  label: l10n.offers,
-                  value: '$offers',
-                  icon: Icons.local_activity_outlined,
-                  color: AppColors.warning,
-                  onTap: () => context.go('/'),
-                ),
-              ),
-            ],
-          ),
-        ),
-        _group(l10n.ordersAndPayments, [
-          _MenuTile(
-            icon: Icons.location_on_outlined,
-            color: AppColors.primary,
-            title: l10n.addresses,
-            subtitle: l10n.addressesSubtitle,
-            onTap: () => context.push('/account/addresses'),
-          ),
-          _MenuTile(
-            icon: Icons.receipt_long_outlined,
-            color: AppColors.tertiary,
-            title: l10n.myOrders,
-            subtitle: l10n.ordersSubtitle,
-            onTap: () => context.go('/orders'),
-          ),
-          _MenuTile(
-            icon: Icons.stars_outlined,
-            color: AppColors.warning,
-            title: l10n.loyalty,
-            subtitle: l10n.loyaltySubtitle,
-            onTap: () => context.push('/account/loyalty'),
-          ),
-          _MenuTile(
-            icon: Icons.account_balance_wallet_outlined,
-            color: AppColors.primaryContainer,
-            title: l10n.wallet,
-            subtitle: l10n.walletSubtitle,
-            onTap: () => context.push('/account/wallet'),
-          ),
-        ]),
-        _group(l10n.preferences, [
-          _MenuTile(
-            icon: Icons.notifications_active_outlined,
-            color: AppColors.primary,
-            title: l10n.notifications,
-            subtitle: l10n.notificationsSubtitle,
-            onTap: () => context.push('/account/notifications'),
-          ),
-          _MenuTile(
-            icon: Icons.language,
-            color: AppColors.tertiary,
-            title: l10n.language,
-            subtitle: arabic ? l10n.arabic : l10n.english,
-            trailing: arabic ? l10n.english : l10n.arabic,
-            onTap: () async {
-              final next = arabic ? 'en' : 'ar';
-              await ref.read(languageProvider.notifier).setLanguage(next);
-              if (ref.read(isSignedInProvider)) {
-                try {
-                  await ref.read(sessionProvider.notifier).updateProfile(language: next);
-                } catch (_) {
-                  // The local preference still applies when the profile call fails.
-                }
-              }
-            },
-          ),
-          _MenuTile(
-            icon: Icons.settings_outlined,
-            color: AppColors.secondary,
-            title: l10n.settings,
-            subtitle: l10n.settingsSubtitle,
-            onTap: () => context.push('/account/settings'),
-          ),
-        ]),
-        _group(l10n.supportAndInfo, [
-          _MenuTile(
-            icon: Icons.support_agent,
-            color: AppColors.tertiary,
-            title: l10n.support,
-            subtitle: l10n.supportSubtitle,
-            onTap: () => context.push('/account/support'),
-          ),
-          _MenuTile(
-            icon: Icons.info_outline,
-            color: AppColors.secondary,
-            title: l10n.about,
-            subtitle: 'v${Env.appVersion}',
-            onTap: () => showAboutDialog(
-              context: context,
-              applicationName: l10n.appName,
-              applicationVersion: Env.appVersion,
-            ),
-          ),
-          _MenuTile(
-            icon: Icons.share_outlined,
-            color: AppColors.primaryContainer,
-            title: l10n.share,
-            subtitle: l10n.shareAppSubtitle,
-            onTap: () => Share.share(
-              '${l10n.appName} — ${l10n.shareAppMessage}',
-              subject: l10n.appName,
-            ),
-          ),
-        ]),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, 0),
-          child: SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.error,
-                side: const BorderSide(color: AppColors.errorContainer),
-              ),
-              icon: const Icon(Icons.logout, size: 18),
-              label: Text(l10n.signOut),
-              onPressed: () async {
-                final confirmed = await showConfirmDialog(
-                  context,
-                  title: l10n.signOut,
-                  message: l10n.signOutConfirm,
-                );
-                if (!confirmed) return;
-                await ref.read(sessionProvider.notifier).signOut();
-                if (context.mounted) context.go('/');
-              },
-            ),
-          ),
+Future<void> _showInfoDialog(
+  BuildContext context,
+  String title,
+  String message,
+) {
+  final l10n = L10n.of(context);
+  return showDialog<void>(
+    context: context,
+    builder: (dialogContext) => AlertDialog(
+      title: Text(title),
+      content: Text(message),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(dialogContext).pop(),
+          child: Text(l10n.close),
         ),
       ],
-    );
-  }
+    ),
+  );
+}
 
-  Widget _group(String title, List<Widget> tiles) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, 0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(bottom: AppSpacing.sm, left: 4, right: 4),
-            child: Text(
-              title,
-              style: AppTypography.labelMd.copyWith(color: AppColors.secondary),
-            ),
-          ),
-          Container(
+class _GuestAccount extends StatelessWidget {
+  const _GuestAccount({required this.l10n});
+
+  final L10n l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(AppSpacing.xxl),
             decoration: BoxDecoration(
               color: AppColors.surfaceContainerLowest,
-              borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
-              border: Border.all(color: AppColors.surfaceContainerHigh),
-              boxShadow: AppColors.cardShadow,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: AppColors.profileBorder),
+              boxShadow: const [
+                BoxShadow(
+                  color: AppColors.profileCardShadow,
+                  blurRadius: 8,
+                  offset: Offset(0, 2),
+                ),
+              ],
             ),
-            clipBehavior: Clip.antiAlias,
             child: Column(
               children: [
-                for (var i = 0; i < tiles.length; i++) ...[
-                  if (i > 0) const Divider(height: 1, color: AppColors.surfaceContainerLow),
-                  tiles[i],
-                ],
+                Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    color: AppColors.profileAccentTint,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: const Icon(
+                    Icons.person_outline,
+                    size: 36,
+                    color: AppColors.profileAccent,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                Text(
+                  l10n.guest,
+                  style: AppTypography.headlineSm.copyWith(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.profileHeading,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  l10n.loginSubtitle,
+                  textAlign: TextAlign.center,
+                  style: AppTypography.bodySm.copyWith(
+                    fontSize: 12,
+                    color: AppColors.profileSecondaryText,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: FilledButton(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppColors.profileAccent,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                    onPressed: () => context.push('/login'),
+                    child: Text(
+                      l10n.signIn,
+                      style: AppTypography.labelLg.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
-        ],
-      ),
+        ),
+        AccountFooter(versionLabel: _versionLabel(l10n)),
+      ],
     );
   }
 }
 
-class _SummaryCard extends StatelessWidget {
-  const _SummaryCard({
-    required this.label,
-    required this.value,
-    required this.icon,
-    required this.color,
-    required this.onTap,
-  });
+class _SignedInAccount extends ConsumerWidget {
+  const _SignedInAccount({required this.profile});
 
-  final String label;
-  final String value;
-  final IconData icon;
-  final Color color;
-  final VoidCallback onTap;
+  final CustomerProfile profile;
 
   @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        decoration: BoxDecoration(
-          color: AppColors.surfaceContainerLowest,
-          borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-          border: Border.all(color: AppColors.surfaceContainerHigh),
-          boxShadow: AppColors.cardShadow,
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = L10n.of(context);
+    final arabic = l10n.isArabic;
+    final wallet = ref.watch(walletProvider).valueOrNull;
+    final loyalty = ref.watch(loyaltyProvider).valueOrNull;
+    final offers = ref.watch(homeProvider).valueOrNull?.offers.length ?? 0;
+    final addresses =
+        ref.watch(addressesProvider).valueOrNull?.addresses.length ?? 0;
+    final notificationsOn = ref.watch(notificationsEnabledProvider);
+    final points = loyalty?.points ?? 0;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        AccountProfileHeader(
+          name: profile.name.isEmpty ? l10n.guest : profile.name,
+          phone: profile.phone,
+          email: profile.email,
+          initials: profile.initials,
+          avatarUrl: profile.avatarUrl,
+          changePhotoTooltip: l10n.changePhoto,
+          onEdit: () => context.push('/account/profile'),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(icon, size: 20, color: color),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              value,
-              style: AppTypography.labelLg.copyWith(fontWeight: FontWeight.w700),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+        AccountSummaryCards(
+          cards: [
+            AccountSummaryCardData(
+              label: l10n.walletCardTitle,
+              value: wallet == null ? '—' : Fmt.money(wallet.availableMinor),
+              unit: l10n.currencyDefault,
+              icon: Icons.account_balance_wallet,
+              iconColor: AppColors.profileAccent,
+              actionLabel: l10n.topUpBalance,
+              accentAction: true,
+              onAction: () => context.push('/account/wallet'),
             ),
-            Text(
-              label,
-              style: AppTypography.labelSm.copyWith(color: AppColors.secondary),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+            AccountSummaryCardData(
+              label: l10n.rewardPoints,
+              value: loyalty == null ? '—' : '$points',
+              unit: l10n.points,
+              icon: Icons.loyalty,
+              iconColor: AppColors.profileEmerald,
+              actionLabel: l10n.redeem,
+              onAction: () => context.push('/account/loyalty'),
+            ),
+            AccountSummaryCardData(
+              label: l10n.offers,
+              value: '$offers',
+              unit: l10n.offersUnit,
+              icon: Icons.local_activity_outlined,
+              iconColor: AppColors.profileAmber,
+              actionLabel: l10n.browse,
+              onAction: () => context.go('/'),
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _MenuTile extends StatelessWidget {
-  const _MenuTile({
-    required this.icon,
-    required this.color,
-    required this.title,
-    required this.subtitle,
-    required this.onTap,
-    this.trailing,
-  });
-
-  final IconData icon;
-  final Color color;
-  final String title;
-  final String subtitle;
-  final VoidCallback onTap;
-  final String? trailing;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        child: Row(
+        AccountMenuSection(
+          title: l10n.manageOrdersAndPayments,
           children: [
-            Container(
-              width: 38,
-              height: 38,
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-              ),
-              child: Icon(icon, size: 20, color: color),
+            AccountMenuTile(
+              icon: Icons.location_on,
+              iconColor: AppColors.profileAccent,
+              iconBackground: AppColors.profileAccentTint,
+              title: l10n.savedAddresses,
+              subtitle: addresses == 0
+                  ? l10n.noAddresses
+                  : l10n.savedAddressesSubtitle(addresses),
+              trailing: addresses == 0
+                  ? null
+                  : AccountCountBadge(label: '$addresses'),
+              onTap: () => context.push('/account/addresses'),
             ),
-            const SizedBox(width: AppSpacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title, style: AppTypography.labelLg),
-                  const SizedBox(height: 1),
-                  Text(
-                    subtitle,
-                    style: AppTypography.bodySm.copyWith(color: AppColors.secondary),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
+            AccountMenuTile(
+              icon: Icons.credit_card,
+              iconColor: AppColors.profileBlue,
+              iconBackground: AppColors.profileBlueTint,
+              title: l10n.paymentMethods,
+              subtitle: l10n.paymentMethodsSubtitle,
+              onTap: () => _showInfoDialog(
+                context,
+                l10n.paymentMethods,
+                l10n.paymentMethodsInfo,
               ),
             ),
-            if (trailing != null)
-              Text(
-                trailing!,
-                style: AppTypography.labelMd.copyWith(color: AppColors.secondary),
-              ),
-            const SizedBox(width: AppSpacing.xs),
-            const Icon(Icons.chevron_left, size: 20, color: AppColors.secondary),
+            AccountMenuTile(
+              icon: Icons.receipt_long,
+              iconColor: AppColors.profilePurple,
+              iconBackground: AppColors.profilePurpleTint,
+              title: l10n.orderHistory,
+              subtitle: l10n.orderHistorySubtitle,
+              onTap: () => context.go('/orders'),
+            ),
+            AccountMenuTile(
+              icon: Icons.stars,
+              iconColor: AppColors.profileAmber,
+              iconBackground: AppColors.profileAmberTint,
+              title: l10n.loyaltyProgram,
+              subtitle: l10n.loyaltyProgramSubtitle,
+              titleBadge: AccountCountBadge(label: '$points ${l10n.points}'),
+              onTap: () => context.push('/account/loyalty'),
+            ),
           ],
         ),
-      ),
+        const SizedBox(height: AppSpacing.lg),
+        AccountMenuSection(
+          title: l10n.preferencesAndSettings,
+          children: [
+            AccountMenuTile(
+              icon: Icons.notifications_active,
+              iconColor: AppColors.profileOrange,
+              iconBackground: AppColors.profileOrangeTint,
+              title: l10n.notificationSettings,
+              subtitle: l10n.notificationSettingsSubtitle,
+              showChevron: false,
+              trailing: AccountSwitch(
+                value: notificationsOn,
+                semanticLabel: l10n.notificationSettings,
+                onChanged: (value) async {
+                  await ref
+                      .read(notificationsEnabledProvider.notifier)
+                      .setEnabled(value);
+                  if (!context.mounted) return;
+                  showAppSnack(
+                    context,
+                    value
+                        ? l10n.notificationsEnabledToast
+                        : l10n.notificationsDisabledToast,
+                  );
+                },
+              ),
+            ),
+            AccountMenuTile(
+              icon: Icons.tune,
+              iconColor: AppColors.profileTeal,
+              iconBackground: AppColors.profileTealTint,
+              title: l10n.languageAndAppearance,
+              subtitle:
+                  '${arabic ? l10n.arabic : l10n.english} • ${l10n.lightTheme}',
+              trailing: Text(
+                arabic ? l10n.arabic : l10n.english,
+                style: AppTypography.labelMd.copyWith(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.profileSecondaryText,
+                ),
+              ),
+              onTap: () async {
+                final next = arabic ? 'en' : 'ar';
+                await ref.read(languageProvider.notifier).setLanguage(next);
+                if (ref.read(isSignedInProvider)) {
+                  try {
+                    await ref
+                        .read(sessionProvider.notifier)
+                        .updateProfile(language: next);
+                  } catch (_) {
+                    // The local preference still applies when the call fails.
+                  }
+                }
+              },
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        AccountMenuSection(
+          title: l10n.supportAndInfo,
+          children: [
+            AccountMenuTile(
+              icon: Icons.support_agent,
+              iconColor: AppColors.profileEmerald,
+              iconBackground: AppColors.profileEmeraldTint,
+              title: l10n.helpAndSupport,
+              subtitle: l10n.supportSubtitle,
+              titleBadge: const AccountStatusDot(),
+              trailing: AccountStatusBadge(label: l10n.availableNow),
+              onTap: () => context.push('/account/support'),
+            ),
+            AccountMenuTile(
+              icon: Icons.description,
+              iconColor: AppColors.profileGray,
+              iconBackground: AppColors.profileGrayTint,
+              title: l10n.termsAndPrivacy,
+              subtitle: l10n.termsAndPrivacySubtitle,
+              onTap: () => _showInfoDialog(
+                context,
+                l10n.termsAndPrivacy,
+                l10n.termsNotice,
+              ),
+            ),
+          ],
+        ),
+        AccountFooter(
+          versionLabel: _versionLabel(l10n),
+          onSignOut: () async {
+            final confirmed = await showConfirmDialog(
+              context,
+              title: l10n.signOut,
+              message: l10n.signOutConfirm,
+            );
+            if (!confirmed) return;
+            await ref.read(sessionProvider.notifier).signOut();
+            if (context.mounted) context.go('/');
+          },
+        ),
+      ],
     );
   }
 }

@@ -53,6 +53,27 @@ const _emptyNotifications = NotificationPage(
   unreadCount: 0,
 );
 
+/// Local, persisted preference for in-app notifications. There is no OS push
+/// channel yet, so this controls whether the app fetches notifications and
+/// shows the unread badge.
+final notificationsEnabledProvider =
+    NotifierProvider<NotificationsPreferenceController, bool>(
+  NotificationsPreferenceController.new,
+);
+
+class NotificationsPreferenceController extends Notifier<bool> {
+  @override
+  bool build() => ref.watch(tokenStoreProvider).cachedNotificationsEnabled;
+
+  Future<void> setEnabled(bool enabled) async {
+    if (enabled == state) return;
+    await ref.read(tokenStoreProvider).writeNotificationsEnabled(enabled);
+    state = enabled;
+  }
+
+  Future<void> toggle() => setEnabled(!state);
+}
+
 final notificationsProvider =
     AsyncNotifierProvider<NotificationsController, NotificationPage>(
   NotificationsController.new,
@@ -67,12 +88,14 @@ class NotificationsController extends AsyncNotifier<NotificationPage> {
   @override
   Future<NotificationPage> build() async {
     ref.watch(personalEpochProvider);
+    if (!ref.watch(notificationsEnabledProvider)) return _emptyNotifications;
     if (ref.watch(sessionProvider).valueOrNull == null) return _emptyNotifications;
     return ref.read(accountRepositoryProvider).notifications();
   }
 
   Future<void> refresh() async {
-    if (ref.read(sessionProvider).valueOrNull == null) {
+    if (!ref.read(notificationsEnabledProvider) ||
+        ref.read(sessionProvider).valueOrNull == null) {
       state = const AsyncValue.data(_emptyNotifications);
       return;
     }

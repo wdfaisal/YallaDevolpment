@@ -147,6 +147,7 @@ class _RestaurantsScreenState extends ConsumerState<RestaurantsScreen> {
                   final restaurant = state.items[index];
                   return RestaurantGridCard(
                     restaurant: restaurant,
+                    showShadow: false,
                     onTap: () => context.push('/restaurants/${restaurant.id}'),
                   );
                 },
@@ -161,6 +162,7 @@ class _RestaurantsScreenState extends ConsumerState<RestaurantsScreen> {
                     if (i > 0) const SizedBox(height: AppSpacing.md),
                     RestaurantListCard(
                       restaurant: state.items[i],
+                      showShadow: false,
                       onTap: () => context.push('/restaurants/${state.items[i].id}'),
                     ),
                   ],
@@ -310,7 +312,7 @@ class _RestaurantsScreenState extends ConsumerState<RestaurantsScreen> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
-                color: AppColors.surfaceContainerLow,
+                color: AppColors.surfaceContainerLowest,
                 borderRadius: BorderRadius.circular(AppSpacing.radius),
                 border: Border.all(color: AppColors.surfaceContainerHigh),
               ),
@@ -335,7 +337,7 @@ class _RestaurantsScreenState extends ConsumerState<RestaurantsScreen> {
               decoration: BoxDecoration(
                 color: state.query.hasFilters
                     ? AppColors.orangeTintSubtle
-                    : AppColors.surfaceContainerLow,
+                    : AppColors.surfaceContainerLowest,
                 borderRadius: BorderRadius.circular(AppSpacing.radius),
                 border: Border.all(
                   color: state.query.hasFilters ? AppColors.primary : AppColors.surfaceContainerHigh,
@@ -520,7 +522,7 @@ class _ViewToggle extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(2),
       decoration: BoxDecoration(
-        color: AppColors.surfaceContainerLow,
+        color: AppColors.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
         border: Border.all(color: AppColors.surfaceContainerHigh),
       ),
@@ -542,9 +544,8 @@ class _ViewToggle extends StatelessWidget {
         width: 30,
         height: 30,
         decoration: BoxDecoration(
-          color: active ? AppColors.surfaceContainerLowest : Colors.transparent,
+          color: active ? AppColors.surfaceContainerLow : Colors.transparent,
           borderRadius: BorderRadius.circular(AppSpacing.radius),
-          boxShadow: active ? AppColors.cardShadow : null,
         ),
         child: Icon(icon, size: 17, color: active ? AppColors.primary : AppColors.secondary),
       ),

@@ -267,6 +267,63 @@ class L10n {
   String get shareAppMessage =>
       _t('اطلب من مطاعمك المفضلة عبر يلا طلبات.', 'Order from your favourite restaurants on Yalla Talabat.');
 
+  // Profile screen (Stitch profile redesign)
+  String get profileTitle => _t('حسابي والملف الشخصي', 'My account & profile');
+  String get walletCardTitle => _t('محفظة يلا', 'Yalla wallet');
+  String get topUpBalance => _t('شحن رصيد', 'Top up');
+  String get rewardPoints => _t('نقاط المكافآت', 'Reward points');
+  String get redeem => _t('استبدال', 'Redeem');
+  String get coupons => _t('الكوبونات', 'Coupons');
+  String get offersUnit => _t('عروض', 'offers');
+  String get browse => _t('استعراض', 'View');
+  String get manageOrdersAndPayments =>
+      _t('إدارة الطلبات والمدفوعات', 'Manage orders & payments');
+  String get savedAddresses => _t('العناوين المحفوظة', 'Saved addresses');
+  String get paymentMethods => _t('طرق الدفع والبطاقات', 'Payment methods & cards');
+  String get paymentMethodsSubtitle => _t('الدفع عند الاستلام متاح', 'Cash on delivery available');
+  String get paymentMethodsInfo => _t(
+        'الدفع عند الاستلام متاح حالياً. الدفع الإلكتروني غير متاح بعد.',
+        'Cash on delivery is available now. Online card payments are not available yet.',
+      );
+  String get orderHistory => _t('سجل الطلبات والفواتير', 'Order history & invoices');
+  String get orderHistorySubtitle => _t(
+        'تحميل الفواتير الضريبية وتكرار الطلبات',
+        'Download tax invoices and reorder',
+      );
+  String get loyaltyProgram => _t('برنامج الولاء والمكافآت', 'Loyalty & rewards');
+  String get loyaltyProgramSubtitle =>
+      _t('عروض حصرية ومستويات الخصم', 'Exclusive offers and discount tiers');
+  String get preferencesAndSettings =>
+      _t('التفضيلات والإعدادات', 'Preferences & settings');
+  String get notificationSettings => _t('الإشعارات والتنبيهات', 'Notifications & alerts');
+  String get notificationSettingsSubtitle => _t(
+        'تحديثات فورية لحالة الطلب والعروض',
+        'Instant order status and offer updates',
+      );
+  String get languageAndAppearance =>
+      _t('تفضيلات اللغة والمظهر', 'Language & appearance');
+  String get languageAndAppearanceSubtitle =>
+      _t('العربية • مظهر النهار الفاتح', 'English • Light theme');
+  String get helpAndSupport => _t('المساعدة وخدمة العملاء', 'Help & customer service');
+  String get availableNow => _t('متاح الآن', 'Available now');
+  String get termsAndPrivacy => _t('الشروط وسياسة الخصوصية', 'Terms & privacy policy');
+  String get termsAndPrivacySubtitle => _t(
+        'حقوق المستخدم والاتفاقيات الرسمية',
+        'User rights and official agreements',
+      );
+  String get notificationsEnabledToast => _t('تم تفعيل التنبيهات', 'Notifications enabled');
+  String get notificationsDisabledToast => _t('تم إيقاف التنبيهات', 'Notifications disabled');
+  String get changePhoto => _t('تغيير الصورة الشخصية', 'Change profile photo');
+  String get lightTheme => _t('مظهر النهار الفاتح', 'Light theme');
+  String savedAddressesSubtitle(int count) => _t(
+        '$count عناوين مسجلة للتوصيل السريع',
+        '$count saved delivery addresses',
+      );
+  String get termsNotice => _t(
+        'لم تُنشر الشروط وسياسة الخصوصية داخل التطبيق بعد. للاستفسار تواصل مع خدمة العملاء.',
+        'Terms and the privacy policy are not published in the app yet. Contact customer service for details.',
+      );
+
   // Auth
   String get loginTitle => _t('تسجيل الدخول', 'Sign in');
   String get loginSubtitle =>

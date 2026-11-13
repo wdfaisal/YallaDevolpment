@@ -54,6 +54,37 @@ class AppColors {
   static const Color borderMuted = Color(0xFFE4BEB3);
   static const Color textMuted = Color(0xFF5B4038);
 
+  /// Profile/account screen accent from the Stitch profile design. Kept
+  /// separate from [primary] so the rest of the app keeps its orange brand.
+  static const Color profileAccent = Color(0xFFD9222A);
+  static const Color profileAccentTint = Color(0xFFFFF1F1);
+  static const Color profileBorder = Color(0xFFEEEEEE);
+  static const Color profileSurfaceMuted = Color(0xFFF9FAFB);
+  static const Color profileChip = Color(0xFFF3F4F6);
+  static const Color profileMuted = Color(0xFF9CA3AF);
+  static const Color profileSecondaryText = Color(0xFF6B7280);
+  static const Color profileHeading = Color(0xFF111827);
+
+  // Stitch profile accent palette (Tailwind 50/600 pairs).
+  static const Color profileRedBorder = Color(0xFFFEE2E2);
+  static const Color profileBlue = Color(0xFF2563EB);
+  static const Color profileBlueTint = Color(0xFFEFF6FF);
+  static const Color profilePurple = Color(0xFF9333EA);
+  static const Color profilePurpleTint = Color(0xFFFAF5FF);
+  static const Color profileAmber = Color(0xFFD97706);
+  static const Color profileAmberTint = Color(0xFFFFFBEB);
+  static const Color profileEmerald = Color(0xFF059669);
+  static const Color profileEmeraldTint = Color(0xFFECFDF5);
+  static const Color profileEmeraldText = Color(0xFF047857);
+  static const Color profileOrange = Color(0xFFEA580C);
+  static const Color profileOrangeTint = Color(0xFFFFF7ED);
+  static const Color profileTeal = Color(0xFF0D9488);
+  static const Color profileTealTint = Color(0xFFF0FDFA);
+  static const Color profileGray = Color(0xFF4B5563);
+  static const Color profileGrayTint = Color(0xFFF3F4F6);
+  static const Color profileTrack = Color(0xFFE5E7EB);
+  static const Color profileCardShadow = Color(0x08000000);
+
   /// Warm home service tiles from the Stitch home specification.
   static const Color serviceTile = Color(0xFFF7EFE5);
   static const Color serviceTileBorder = Color(0xFFF0E6D8);

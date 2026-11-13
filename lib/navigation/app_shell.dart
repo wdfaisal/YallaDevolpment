@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../core/design/app_colors.dart';
 import '../core/localization/l10n.dart';
 import '../core/widgets/app_bottom_nav.dart';
 
@@ -40,6 +41,7 @@ class AppShell extends ConsumerWidget {
               label: l10n.account,
               icon: Icons.person_outline,
               activeIcon: Icons.person,
+              activeColor: AppColors.profileAccent,
             ),
           ],
           currentIndex: navigationShell.currentIndex,

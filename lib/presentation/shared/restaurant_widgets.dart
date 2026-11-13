@@ -68,11 +68,15 @@ class RestaurantListCard extends StatelessWidget {
     required this.restaurant,
     required this.onTap,
     this.showFavorite = true,
+    this.showShadow = true,
   });
 
   final CatalogRestaurant restaurant;
   final VoidCallback onTap;
   final bool showFavorite;
+
+  /// The all-restaurants screen uses a flat, shadow-free surface.
+  final bool showShadow;
 
   @override
   Widget build(BuildContext context) {
@@ -87,7 +91,7 @@ class RestaurantListCard extends StatelessWidget {
           color: AppColors.surfaceContainerLowest,
           borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
           border: Border.all(color: AppColors.surfaceContainerHigh),
-          boxShadow: AppColors.cardShadow,
+          boxShadow: showShadow ? AppColors.cardShadow : null,
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,

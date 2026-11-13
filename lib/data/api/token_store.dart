@@ -9,18 +9,27 @@ class TokenStore {
       : _storage = storage ?? const FlutterSecureStorage();
 
   static const String _key = 'yalla_customer_session_token';
+  static const String _notificationsKey =
+      'yalla_customer_notifications_enabled';
 
   final FlutterSecureStorage _storage;
   String? _memory;
   String _language = 'ar';
+  bool _notificationsEnabled = true;
 
   /// Last persisted UI language (`ar`/`en`), available synchronously after
   /// [loadPreferences] runs at startup.
   String get cachedLanguage => _language;
 
+  /// Last persisted in-app notification preference, available synchronously
+  /// after [loadPreferences] runs at startup. Defaults to enabled.
+  bool get cachedNotificationsEnabled => _notificationsEnabled;
+
   Future<void> loadPreferences() async {
     final stored = await readLanguage();
     if (stored != null && (stored == 'ar' || stored == 'en')) _language = stored;
+    final notifications = await readNotificationsEnabled();
+    if (notifications != null) _notificationsEnabled = notifications;
   }
 
   Future<String?> read() async {
@@ -65,6 +74,28 @@ class TokenStore {
       await _storage.write(key: 'yalla_customer_language', value: code);
     } catch (_) {
       // Language preference is non-critical.
+    }
+  }
+
+  Future<bool?> readNotificationsEnabled() async {
+    try {
+      final stored = await _storage.read(key: _notificationsKey);
+      if (stored == null) return null;
+      return stored == 'true';
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<void> writeNotificationsEnabled(bool enabled) async {
+    _notificationsEnabled = enabled;
+    try {
+      await _storage.write(
+        key: _notificationsKey,
+        value: enabled ? 'true' : 'false',
+      );
+    } catch (_) {
+      // Notification preference is non-critical.
     }
   }
 }
