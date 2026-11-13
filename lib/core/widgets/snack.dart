@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../design/app_colors.dart';
 import '../design/app_spacing.dart';
 import '../design/app_typography.dart';
+import '../localization/l10n.dart';
 
 /// Consistent floating snack bar used for confirmations and recoverable
 /// errors.
@@ -87,7 +88,7 @@ class SheetHeader extends StatelessWidget {
                 IconButton(
                   onPressed: onClose,
                   icon: const Icon(Icons.close),
-                  tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
+                  tooltip: L10n.of(context).close,
                 ),
             ],
           ),

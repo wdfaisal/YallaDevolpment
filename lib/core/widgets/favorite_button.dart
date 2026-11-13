@@ -14,6 +14,8 @@ class FavoriteButton extends ConsumerWidget {
     required this.targetId,
     this.size = 30,
     this.background = AppColors.surfaceContainerLow,
+    this.foregroundColor,
+    this.borderColor,
     this.onChanged,
   });
 
@@ -21,6 +23,12 @@ class FavoriteButton extends ConsumerWidget {
   final String targetId;
   final double size;
   final Color background;
+
+  /// Overrides the heart color; used on top of dark imagery.
+  final Color? foregroundColor;
+
+  /// Optional hairline border for translucent hero buttons.
+  final Color? borderColor;
   final ValueChanged<bool>? onChanged;
 
   @override
@@ -55,11 +63,18 @@ class FavoriteButton extends ConsumerWidget {
       child: Container(
         width: size,
         height: size,
-        decoration: BoxDecoration(color: background, shape: BoxShape.circle),
+        decoration: BoxDecoration(
+          color: background,
+          shape: BoxShape.circle,
+          border: borderColor == null
+              ? null
+              : Border.all(color: borderColor!),
+        ),
         child: Icon(
           isFavorite ? Icons.favorite : Icons.favorite_border,
           size: size * 0.55,
-          color: isFavorite ? AppColors.primary : AppColors.onSurface,
+          color: foregroundColor ??
+              (isFavorite ? AppColors.primary : AppColors.onSurface),
         ),
       ),
     );

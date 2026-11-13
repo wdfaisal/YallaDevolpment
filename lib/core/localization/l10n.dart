@@ -141,6 +141,41 @@ class L10n {
   String get restaurantClosedNotice =>
       _t('المطعم مغلق حالياً ولا يمكن استقبال الطلبات.', 'The restaurant is closed and not accepting orders.');
 
+  // Restaurant details (Stitch redesign)
+  String get menuSections => _t('قائمة الأقسام', 'Menu sections');
+  String get searchMenuHint => _t('ابحث في القائمة…', 'Search the menu…');
+  String get fastDelivery => _t('توصيل سريع جداً', 'Very fast delivery');
+  String get exclusiveYallaOffers =>
+      _t('خصومات حصرية يلا', 'Exclusive Yalla offers');
+  String menuItemsCount(int count) {
+    if (!isArabic) return count == 1 ? '1 tasty item' : '$count tasty items';
+    if (count == 1) return 'صنف واحد شهي';
+    if (count == 2) return 'صنفان شهيان';
+    return '$count أصناف شهية';
+  }
+
+  String itemCountShort(int count) {
+    if (!isArabic) return count == 1 ? '1 item' : '$count items';
+    if (count == 1) return 'صنف واحد';
+    if (count == 2) return 'صنفان';
+    return '$count أصناف';
+  }
+
+  String ratingCountLabel(int count) =>
+      _t('+$count تقييم', '+$count reviews');
+  String caloriesLabel(int kcal) => _t('$kcal سعرة', '$kcal kcal');
+  String get includesVat => _t('(شامل الضريبة)', '(incl. VAT)');
+
+  String cartItemsCount(int count) {
+    if (count <= 0) return _t('السلة فارغة', 'Cart is empty');
+    if (!isArabic) {
+      return count == 1 ? '1 item in cart' : '$count items in cart';
+    }
+    if (count == 1) return 'صنف واحد في السلة';
+    if (count == 2) return 'صنفان في السلة';
+    return '$count أصناف في السلة';
+  }
+
   // Meal drawer
   String get required => _t('إلزامي', 'Required');
   String get optional => _t('اختياري', 'Optional');
@@ -149,6 +184,8 @@ class L10n {
   String get specialInstructions => _t('ملاحظات خاصة', 'Special instructions');
   String get notesHint => _t('مثال: بدون بصل، صوص إضافي…', 'e.g. no onions, extra sauce…');
   String get quantity => _t('الكمية', 'Quantity');
+  String get decreaseQuantity => _t('تقليل', 'Decrease quantity');
+  String get increaseQuantity => _t('زيادة', 'Increase quantity');
   String get addFor => _t('إضافة', 'Add');
   String get selectRequiredOptions =>
       _t('أكمل الخيارات الإلزامية أولاً', 'Complete the required options first');
@@ -371,6 +408,67 @@ class L10n {
   // Notifications
   String get markAllRead => _t('تعليم الكل كمقروء', 'Mark all as read');
   String get noNotifications => _t('لا توجد إشعارات', 'No notifications');
+  String get markAllReadAction =>
+      _t('تحديد الكل كمقروء', 'Mark all as read');
+  String get notificationsAllFilter => _t('الكل', 'All');
+  String get notificationsOrdersFilter =>
+      _t('حالة الطلبات', 'Order status');
+  String get notificationsOffersFilter =>
+      _t('العروض والخصومات', 'Offers & discounts');
+  String get notificationsAccountFilter =>
+      _t('المحفظة والحساب', 'Wallet & account');
+  String get notificationsGroupToday => _t('اليوم', 'Today');
+  String get notificationsGroupYesterday => _t('أمس', 'Yesterday');
+  String get notificationsGroupThisWeek => _t('هذا الأسبوع', 'This week');
+  String get notificationsGroupOlder => _t('أقدم', 'Older');
+  String get allNotificationsRead =>
+      _t('تمت قراءة جميع الإشعارات بنجاح', 'All notifications read');
+  String get notificationMarkRead => _t('تحديد كمقروء', 'Mark as read');
+  String get viewOrder => _t('عرض الطلب', 'View order');
+  String get trackOrderFull => _t('تتبع مسار الطلب', 'Track order');
+  String get notificationsSettingsTitle =>
+      _t('تخصيص الإشعارات الذكية', 'Smart notification preferences');
+  String get notificationsSettingsBody => _t(
+        'يمكنك تفعيل أو إيقاف تنبيهات الطلبات داخل التطبيق في أي وقت.',
+        'Turn in-app order alerts on or off at any time.',
+      );
+  String get manageNotificationSettings =>
+      _t('إدارة إعدادات التنبيهات', 'Manage notification settings');
+  String get versionShort => _t('الإصدار', 'Version');
+  String get notificationsEmptyTitle =>
+      _t('لا توجد إشعارات في هذا القسم', 'No notifications in this section');
+  String get notificationsEmptyMessage => _t(
+        'أنت على اطلاع دائم بكل شيء! سنرسل لك تنبيهاً فور حدوث أي تحديث جديد لطلباتك أو عروضنا.',
+        'You are all caught up. We will alert you as soon as something new happens with your orders or offers.',
+      );
+  String get backToAllNotifications =>
+      _t('العودة لجميع الإشعارات', 'Back to all notifications');
+  String get notificationsDisabledTitle =>
+      _t('التنبيهات متوقفة', 'Notifications are off');
+  String get notificationsDisabledMessage => _t(
+        'فعّل التنبيهات لتصلك تحديثات طلباتك داخل التطبيق.',
+        'Turn notifications on to receive your order updates in the app.',
+      );
+  String get enableNotifications =>
+      _t('تفعيل التنبيهات', 'Enable notifications');
+  String get unreadNotificationsPrefix => _t('لديك', 'You have');
+  String get unreadNotificationsSuffix =>
+      _t('إشعارات غير مقروءة', 'unread notifications');
+  String unreadNotificationsNotice(int count) => _t(
+        'لديك $count إشعارات غير مقروءة',
+        'You have $count unread notifications',
+      );
+  String newNotificationsCount(int count) =>
+      _t('$count جديد', '$count new');
+  String notificationCount(int count) {
+    if (isArabic) {
+      if (count == 1) return 'إشعار واحد';
+      if (count == 2) return 'إشعاران';
+      if (count <= 10) return '$count إشعارات';
+      return '$count إشعاراً';
+    }
+    return count == 1 ? '1 notification' : '$count notifications';
+  }
 
   // Wallet / loyalty
   String get availableBalance => _t('الرصيد المتاح', 'Available balance');

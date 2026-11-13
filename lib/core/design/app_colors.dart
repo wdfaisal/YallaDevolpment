@@ -28,16 +28,21 @@ class AppColors {
   static const Color inversePrimary = Color(0xFFFFB59E);
   static const Color primaryFixed = Color(0xFFFFDBD0);
   static const Color primaryFixedDim = Color(0xFFFFB59E);
+  static const Color onPrimaryFixedVariant = Color(0xFF842500);
 
   static const Color secondary = Color(0xFF5B5F63);
   static const Color onSecondary = Color(0xFFFFFFFF);
   static const Color secondaryContainer = Color(0xFFDDE0E5);
   static const Color onSecondaryContainer = Color(0xFF5F6368);
+  static const Color secondaryFixed = Color(0xFFE0E3E8);
+  static const Color onSecondaryFixed = Color(0xFF181C20);
 
   static const Color tertiary = Color(0xFF006C4A);
   static const Color onTertiary = Color(0xFFFFFFFF);
   static const Color tertiaryContainer = Color(0xFF00A673);
   static const Color onTertiaryContainer = Color(0xFF003220);
+  static const Color tertiaryFixed = Color(0xFF7AFAC0);
+  static const Color onTertiaryFixed = Color(0xFF002114);
 
   static const Color error = Color(0xFFBA1A1A);
   static const Color onError = Color(0xFFFFFFFF);
@@ -127,6 +132,15 @@ class AppColors {
       color: Color(0x0F181C20),
       blurRadius: 24,
       offset: Offset(0, -4),
+    ),
+  ];
+
+  /// Warm shadow behind notification cards from the Stitch notification design.
+  static const List<BoxShadow> notificationCardShadow = [
+    BoxShadow(
+      color: Color(0x0FFF591B),
+      blurRadius: 12,
+      offset: Offset(0, 2),
     ),
   ];
 }
