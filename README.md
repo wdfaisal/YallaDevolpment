@@ -62,6 +62,13 @@ In Codemagic add the same flag to the build step's build arguments. The Gradle
 wrapper (`gradlew`, `gradle-wrapper.jar`) is intentionally not committed;
 Flutter regenerates it from the SDK before the Gradle build runs.
 
+Toolchain pinned in `android/` (kept at or above Flutter's minimum supported
+versions so newer Codemagic images can build without editing the project):
+
+- Gradle 9.5.0 (`android/gradle/wrapper/gradle-wrapper.properties`)
+- Android Gradle Plugin 9.2.1 (`android/settings.gradle.kts`)
+- Kotlin 2.4.0, JDK 17+, `minSdk 24`, `compileSdk`/`targetSdk` from Flutter
+
 ## Checks
 
 ```bash
