@@ -70,6 +70,19 @@ class _RestaurantScreenState extends ConsumerState<RestaurantScreen> {
     final detail = ref.watch(restaurantDetailProvider(widget.restaurantId));
     final cart = ref.watch(cartProvider).valueOrNull;
     final data = detail.valueOrNull;
+    // The tray is only mounted once this restaurant has something in the cart,
+    // so the menu page stays clean until the customer adds their first item.
+    final cartTray = data != null &&
+            cart != null &&
+            cart.restaurantId == data.restaurant.id &&
+            cart.itemCount > 0
+        ? RestaurantCartTray(
+            cart: cart,
+            restaurantId: data.restaurant.id,
+            l10n: l10n,
+            onCheckout: () => context.push('/cart'),
+          )
+        : null;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       // The hero photo sits under the notch, so default to light icons; the
@@ -84,14 +97,7 @@ class _RestaurantScreenState extends ConsumerState<RestaurantScreen> {
               .refresh(),
           builder: (detail) => _content(context, l10n, detail, cart),
         ),
-        bottomNavigationBar: data == null || cart == null
-            ? null
-            : RestaurantCartTray(
-                cart: cart,
-                restaurantId: data.restaurant.id,
-                l10n: l10n,
-                onCheckout: () => context.push('/cart'),
-              ),
+        bottomNavigationBar: cartTray,
       ),
     );
   }

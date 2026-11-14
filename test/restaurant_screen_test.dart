@@ -89,22 +89,61 @@ class _FakeDetail extends RestaurantDetailController {
 }
 
 class _FakeCart extends CartController {
+  _FakeCart(this.cart);
+
+  final CartResponse cart;
+
   @override
-  Future<CartResponse> build() async => const CartResponse(
-        cartId: null,
-        restaurantId: null,
-        restaurantName: null,
-        lines: [],
-        itemCount: 0,
-        updatedAt: null,
-        quote: null,
-      );
+  Future<CartResponse> build() async => cart;
+}
+
+const CartResponse _emptyCart = CartResponse(
+  cartId: null,
+  restaurantId: null,
+  restaurantName: null,
+  lines: [],
+  itemCount: 0,
+  updatedAt: null,
+  quote: null,
+);
+
+CartResponse _filledCart() {
+  return const CartResponse(
+    cartId: 'cart_1',
+    restaurantId: 'res_1',
+    restaurantName: 'البيك',
+    lines: [
+      CartLine(
+        id: 'line_1',
+        menuItemId: 'item_0',
+        name: 'برجر دجاج 0',
+        imageUrl: null,
+        quantity: 1,
+        notes: '',
+        options: [],
+        unitBaseMinor: 1580000,
+        unitOptionsMinor: 0,
+        unitOriginalMinor: 1580000,
+        unitTotalMinor: 1580000,
+        offerDiscountMinor: 0,
+        offerTitleAr: null,
+        offerTitleEn: null,
+        lineTotalMinor: 1580000,
+        available: true,
+        unavailableReason: null,
+      ),
+    ],
+    itemCount: 1,
+    updatedAt: null,
+    quote: null,
+  );
 }
 
 Future<void> _pumpScreen(
   WidgetTester tester,
-  CatalogRestaurantDetail detail,
-) async {
+  CatalogRestaurantDetail detail, {
+  CartResponse cart = _emptyCart,
+}) async {
   tester.view.physicalSize = const Size(390, 844);
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.resetPhysicalSize);
@@ -115,7 +154,7 @@ Future<void> _pumpScreen(
       const RestaurantScreen(restaurantId: 'res_1'),
       overrides: [
         restaurantDetailProvider.overrideWith(() => _FakeDetail(detail)),
-        cartProvider.overrideWith(_FakeCart.new),
+        cartProvider.overrideWith(() => _FakeCart(cart)),
       ],
     ),
   );
@@ -175,8 +214,23 @@ void main() {
     );
   });
 
-  testWidgets('the body keeps its height above the cart tray', (tester) async {
+  testWidgets('the cart tray stays hidden while the cart is empty', (
+    tester,
+  ) async {
     await _pumpScreen(tester, _detail());
+
+    expect(find.byType(RestaurantCartTray), findsNothing);
+  });
+
+  testWidgets('the cart tray appears once an item is added', (tester) async {
+    await _pumpScreen(tester, _detail(), cart: _filledCart());
+
+    expect(find.byType(RestaurantCartTray), findsOneWidget);
+    expect(find.text('إتمام الطلب'), findsOneWidget);
+  });
+
+  testWidgets('the body keeps its height above the cart tray', (tester) async {
+    await _pumpScreen(tester, _detail(), cart: _filledCart());
 
     // Regression: the tray used an expanding Center inside
     // bottomNavigationBar, which claimed the full screen height and left the
@@ -194,6 +248,6 @@ void main() {
 
     expect(tester.takeException(), isNull);
     expect(find.text('لا توجد بيانات لعرضها'), findsOneWidget);
-    expect(find.text('السلة فارغة'), findsOneWidget);
+    expect(find.byType(RestaurantCartTray), findsNothing);
   });
 }

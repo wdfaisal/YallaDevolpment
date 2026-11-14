@@ -8,9 +8,11 @@ import '../../../core/localization/l10n.dart';
 import '../../../core/widgets/app_image.dart';
 import '../../../data/models/catalog.dart';
 
-/// Horizontal menu row from the Stitch restaurant design: text + price +
-/// quantity stepper on the start side, 96px image on the end side. Flat white
-/// card separated by a hairline border instead of a shadow.
+/// Horizontal menu row from the Stitch restaurant design: text + price on the
+/// start side and a 96px image on the end side. The add control is outlined and
+/// floats over the bottom-right corner of the photo; once the item is in the
+/// cart it becomes a white outlined stepper. Flat white card separated by a
+/// hairline border instead of a shadow.
 class RestaurantMenuItemCard extends StatelessWidget {
   const RestaurantMenuItemCard({
     super.key,
@@ -74,21 +76,7 @@ class RestaurantMenuItemCard extends StatelessWidget {
                       ),
                     ],
                     const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _PriceBlock(item: item, l10n: l10n),
-                        ),
-                        const SizedBox(width: 8),
-                        _QuantityStepper(
-                          quantity: quantity,
-                          canAdd: canAdd,
-                          l10n: l10n,
-                          onIncrement: onIncrement,
-                          onDecrement: onDecrement,
-                        ),
-                      ],
-                    ),
+                    _PriceBlock(item: item, l10n: l10n),
                   ],
                 ),
               ),
@@ -103,7 +91,7 @@ class RestaurantMenuItemCard extends StatelessWidget {
                       width: 96,
                       height: 96,
                       borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                      backgroundColor: AppColors.surfaceContainer,
+                      backgroundColor: AppColors.surfaceContainerLowest,
                       icon: Icons.fastfood_outlined,
                     ),
                     if (!item.available)
@@ -125,7 +113,7 @@ class RestaurantMenuItemCard extends StatelessWidget {
                       ),
                     if (item.calories != null)
                       PositionedDirectional(
-                        bottom: 4,
+                        top: 4,
                         start: 4,
                         child: Container(
                           padding: const EdgeInsets.symmetric(
@@ -144,6 +132,17 @@ class RestaurantMenuItemCard extends StatelessWidget {
                           ),
                         ),
                       ),
+                    PositionedDirectional(
+                      bottom: 4,
+                      start: 4,
+                      child: _MenuQuantityControl(
+                        quantity: quantity,
+                        canAdd: canAdd,
+                        l10n: l10n,
+                        onIncrement: onIncrement,
+                        onDecrement: onDecrement,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -226,8 +225,10 @@ class _PriceBlock extends StatelessWidget {
   }
 }
 
-class _QuantityStepper extends StatelessWidget {
-  const _QuantityStepper({
+/// Outlined add button that turns into a white quantity stepper once the item
+/// is in the cart. It sits on the bottom-right corner of the product photo.
+class _MenuQuantityControl extends StatelessWidget {
+  const _MenuQuantityControl({
     required this.quantity,
     required this.canAdd,
     required this.l10n,
@@ -243,42 +244,45 @@ class _QuantityStepper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (quantity == 0) {
+      return _OutlineStepButton(
+        icon: Icons.add,
+        tooltip: l10n.increaseQuantity,
+        onTap: canAdd ? onIncrement : null,
+        emphasized: true,
+        size: 34,
+      );
+    }
     return Container(
-      padding: const EdgeInsets.all(4),
+      padding: const EdgeInsets.all(2),
       decoration: BoxDecoration(
-        color: AppColors.surfaceContainerLow,
+        color: AppColors.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
+        border: Border.all(color: AppColors.surfaceContainerHigh),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _StepButton(
+          _OutlineStepButton(
             icon: Icons.remove,
             tooltip: l10n.decreaseQuantity,
-            background: AppColors.surfaceContainer,
-            foreground: quantity > 0
-                ? AppColors.onSurface
-                : AppColors.surfaceDim,
-            onTap: quantity > 0 ? onDecrement : null,
+            onTap: onDecrement,
           ),
           SizedBox(
-            width: 32,
+            width: 24,
             child: Text(
               '$quantity',
               textAlign: TextAlign.center,
-              style: AppTypography.labelLg.copyWith(
+              style: AppTypography.labelMd.copyWith(
                 fontWeight: FontWeight.w700,
               ),
             ),
           ),
-          _StepButton(
+          _OutlineStepButton(
             icon: Icons.add,
             tooltip: l10n.increaseQuantity,
-            background: canAdd
-                ? AppColors.primary
-                : AppColors.surfaceContainerHigh,
-            foreground: canAdd ? AppColors.onPrimary : AppColors.secondary,
             onTap: canAdd ? onIncrement : null,
+            emphasized: true,
           ),
         ],
       ),
@@ -286,35 +290,47 @@ class _QuantityStepper extends StatelessWidget {
   }
 }
 
-class _StepButton extends StatelessWidget {
-  const _StepButton({
+class _OutlineStepButton extends StatelessWidget {
+  const _OutlineStepButton({
     required this.icon,
     required this.tooltip,
-    required this.background,
-    required this.foreground,
     required this.onTap,
+    this.emphasized = false,
+    this.size = 28,
   });
 
   final IconData icon;
   final String tooltip;
-  final Color background;
-  final Color foreground;
   final VoidCallback? onTap;
+  final bool emphasized;
+  final double size;
 
   @override
   Widget build(BuildContext context) {
+    final active = onTap != null;
+    final borderColor = !active
+        ? AppColors.surfaceContainerHigh
+        : (emphasized ? AppColors.primary : AppColors.surfaceContainerHigh);
+    final iconColor = !active
+        ? AppColors.surfaceDim
+        : (emphasized ? AppColors.primary : AppColors.onSurface);
     return Tooltip(
       message: tooltip,
       child: Material(
-        color: background,
-        shape: const CircleBorder(),
+        color: AppColors.surfaceContainerLowest,
+        shape: CircleBorder(
+          side: BorderSide(
+            color: borderColor,
+            width: emphasized && active ? 1.5 : 1,
+          ),
+        ),
         child: InkWell(
           customBorder: const CircleBorder(),
           onTap: onTap,
           child: SizedBox(
-            width: 32,
-            height: 32,
-            child: Icon(icon, size: 16, color: foreground),
+            width: size,
+            height: size,
+            child: Icon(icon, size: size * 0.55, color: iconColor),
           ),
         ),
       ),

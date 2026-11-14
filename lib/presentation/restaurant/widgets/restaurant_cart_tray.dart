@@ -88,11 +88,16 @@ class RestaurantCartTray extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.baseline,
                           textBaseline: TextBaseline.alphabetic,
                           children: [
-                            Text(
-                              Fmt.money(total),
-                              style: AppTypography.headlineMd.copyWith(
-                                color: AppColors.primary,
-                                fontWeight: FontWeight.w700,
+                            Flexible(
+                              flex: 3,
+                              child: Text(
+                                Fmt.money(total),
+                                style: AppTypography.headlineMd.copyWith(
+                                  color: AppColors.primary,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
                             const SizedBox(width: 4),
