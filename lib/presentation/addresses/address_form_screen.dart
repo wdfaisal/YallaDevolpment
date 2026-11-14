@@ -263,7 +263,11 @@ class _AddressFormScreenState extends ConsumerState<AddressFormScreen> {
     final area = [_city.text.trim(), _street.text.trim()]
         .where((part) => part.isNotEmpty)
         .join(' • ');
-    return area.isEmpty ? l10n.noPosition : area;
+    if (area.isNotEmpty) return area;
+    if (_lat != null && _lng != null) {
+      return '${_lat!.toStringAsFixed(5)}، ${_lng!.toStringAsFixed(5)}';
+    }
+    return l10n.noPosition;
   }
 
   Future<void> _editCoordinates() async {
@@ -371,10 +375,16 @@ class _AddressFormScreenState extends ConsumerState<AddressFormScreen> {
         backTooltip: l10n.back,
         accountTooltip: l10n.account,
       ),
-      bottomBar: AddressSaveBar(
-        label: l10n.saveAddress,
-        busy: _busy,
-        onPressed: _save,
+      bottomBar: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (_error != null) _errorBox(),
+          AddressSaveBar(
+            label: l10n.saveAddress,
+            busy: _busy,
+            onPressed: _save,
+          ),
+        ],
       ),
       body: _loading
           ? const Center(
@@ -393,7 +403,6 @@ class _AddressFormScreenState extends ConsumerState<AddressFormScreen> {
                 _facilitiesSection(l10n),
                 _divider(),
                 _preferencesSection(l10n),
-                if (_error != null) _errorBox(),
                 const SizedBox(height: AppSpacing.xxl),
               ],
             ),
@@ -611,7 +620,7 @@ class _AddressFormScreenState extends ConsumerState<AddressFormScreen> {
         AppSpacing.lg,
         AppSpacing.md,
         AppSpacing.lg,
-        0,
+        AppSpacing.md,
       ),
       child: Container(
         padding: const EdgeInsets.all(AppSpacing.md),

@@ -88,11 +88,15 @@ class _AddressFacilitiesSectionState extends State<AddressFacilitiesSection> {
               color: AppColors.primaryContainer,
             ),
             const SizedBox(width: AppSpacing.xs),
-            Text(
-              widget.instructionsLabel,
-              style: AppTypography.bodySm.copyWith(
-                fontSize: 11,
-                color: AppColors.secondary,
+            Expanded(
+              child: Text(
+                widget.instructionsLabel,
+                style: AppTypography.bodySm.copyWith(
+                  fontSize: 11,
+                  color: AppColors.secondary,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],

@@ -90,22 +90,21 @@ class AddressLocationCard extends StatelessWidget {
             child: Row(
               children: [
                 Expanded(
-                  child: Align(
-                    alignment: AlignmentDirectional.centerStart,
-                    child: _QuickAction(
-                      icon: Icons.my_location,
-                      iconColor: AppColors.primaryContainer,
-                      label: enterLabel,
-                      onTap: onEnterCoordinates,
-                    ),
+                  child: _QuickAction(
+                    icon: Icons.my_location,
+                    iconColor: AppColors.primaryContainer,
+                    label: enterLabel,
+                    onTap: onEnterCoordinates,
                   ),
                 ),
                 const SizedBox(width: AppSpacing.sm),
-                _QuickAction(
-                  icon: Icons.touch_app,
-                  iconColor: AppColors.secondary,
-                  label: resetLabel,
-                  onTap: onResetPin,
+                Expanded(
+                  child: _QuickAction(
+                    icon: Icons.touch_app,
+                    iconColor: AppColors.secondary,
+                    label: resetLabel,
+                    onTap: onResetPin,
+                  ),
                 ),
               ],
             ),
@@ -213,17 +212,20 @@ class _QuickAction extends StatelessWidget {
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(icon, size: 17, color: iconColor),
               const SizedBox(width: 5),
-              Text(
-                label,
-                style: AppTypography.labelMd.copyWith(
-                  color: AppColors.onSurface,
-                  fontWeight: FontWeight.w500,
+              Flexible(
+                child: Text(
+                  label,
+                  style: AppTypography.labelMd.copyWith(
+                    color: AppColors.onSurface,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
               ),
             ],
           ),

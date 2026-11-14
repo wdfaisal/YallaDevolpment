@@ -47,7 +47,21 @@ class CheckoutSummaryCard extends StatelessWidget {
             label: l10n.subtotal,
             value: Fmt.moneyExact(currentQuote.subtotalMinor),
             currency: currency,
+            original: currentQuote.subtotalOriginalMinor >
+                    currentQuote.subtotalMinor
+                ? Fmt.moneyExact(
+                    currentQuote.subtotalOriginalMinor,
+                    currency: currency,
+                  )
+                : null,
           ),
+          if (currentQuote.offerDiscountMinor > 0)
+            _PriceRow(
+              label: l10n.offersDiscount,
+              value: '-${Fmt.moneyExact(currentQuote.offerDiscountMinor)}',
+              currency: currency,
+              highlight: true,
+            ),
           if (currentQuote.fulfillment == 'delivery')
             _PriceRow(
               label: l10n.deliveryFee,

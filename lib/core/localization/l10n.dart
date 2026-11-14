@@ -192,6 +192,7 @@ class L10n {
   String get decreaseQuantity => _t('تقليل', 'Decrease quantity');
   String get increaseQuantity => _t('زيادة', 'Increase quantity');
   String get addFor => _t('إضافة', 'Add');
+  String get addToBasket => _t('إضافة للسلة', 'Add to basket');
   String get selectRequiredOptions => _t(
       'أكمل الخيارات الإلزامية أولاً', 'Complete the required options first');
   String get addedToCart => _t('أُضيف إلى السلة', 'Added to cart');
@@ -211,6 +212,7 @@ class L10n {
   String get subtotal => _t('المجموع الفرعي', 'Subtotal');
   String get vat => _t('الضريبة', 'VAT');
   String get discount => _t('الخصم', 'Discount');
+  String get offersDiscount => _t('خصم العروض', 'Offers discount');
   String get total => _t('الإجمالي', 'Total');
   String get couponCode => _t('كود الخصم', 'Coupon code');
   String get applyCoupon => _t('تطبيق', 'Apply');

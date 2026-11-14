@@ -37,7 +37,9 @@ class CheckoutItemCard extends StatelessWidget {
     final text = description?.trim() ?? '';
     final hasDescription = text.isNotEmpty;
     final unitPrice = Fmt.moneyExact(line.unitTotalMinor);
+    final originalUnitPrice = Fmt.moneyExact(line.unitOriginalMinor);
     final linePrice = Fmt.moneyExact(line.lineTotalMinor);
+    final originalLinePrice = Fmt.moneyExact(line.unitOriginalMinor * line.quantity);
     final showUnitRow = line.quantity > 1 || linePrice != unitPrice;
 
     return CheckoutSectionCard(
@@ -103,6 +105,31 @@ class CheckoutItemCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
+                if (line.hasOffer)
+                  Padding(
+                    padding: const EdgeInsets.only(top: AppSpacing.xs),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.local_offer_outlined,
+                          size: 12,
+                          color: AppColors.primary,
+                        ),
+                        const SizedBox(width: 4),
+                        Flexible(
+                          child: Text(
+                            line.offerTitle(l10n.isArabic) ??
+                                l10n.offersDiscount,
+                            style: AppTypography.labelSm.copyWith(
+                              color: AppColors.primary,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 if (line.notes.isNotEmpty)
                   Padding(
                     padding: const EdgeInsets.only(top: AppSpacing.xs),
@@ -133,13 +160,33 @@ class CheckoutItemCard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           if (showUnitRow)
-                            Text(
-                              '$unitPrice $currency × ${line.quantity}',
-                              style: AppTypography.bodySm.copyWith(
-                                color: AppColors.secondary,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                            Row(
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    '$unitPrice $currency × ${line.quantity}',
+                                    style: AppTypography.bodySm.copyWith(
+                                      color: AppColors.secondary,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                if (line.hasOffer) ...[
+                                  const SizedBox(width: 6),
+                                  Flexible(
+                                    child: Text(
+                                      '$originalUnitPrice $currency',
+                                      style: AppTypography.labelSm.copyWith(
+                                        color: AppColors.secondary,
+                                        decoration: TextDecoration.lineThrough,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ],
                             ),
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.baseline,
@@ -150,6 +197,9 @@ class CheckoutItemCard extends StatelessWidget {
                                   linePrice,
                                   style: AppTypography.headlineSm.copyWith(
                                     fontWeight: FontWeight.w700,
+                                    color: line.hasOffer
+                                        ? AppColors.primary
+                                        : AppColors.onSurface,
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
@@ -162,6 +212,20 @@ class CheckoutItemCard extends StatelessWidget {
                                   color: AppColors.secondary,
                                 ),
                               ),
+                              if (line.hasOffer) ...[
+                                const SizedBox(width: 6),
+                                Flexible(
+                                  child: Text(
+                                    '$originalLinePrice $currency',
+                                    style: AppTypography.labelSm.copyWith(
+                                      color: AppColors.secondary,
+                                      decoration: TextDecoration.lineThrough,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
                             ],
                           ),
                         ],

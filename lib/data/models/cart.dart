@@ -45,13 +45,19 @@ class CartLine {
     required this.options,
     required this.unitBaseMinor,
     required this.unitOptionsMinor,
+    required this.unitOriginalMinor,
     required this.unitTotalMinor,
+    required this.offerDiscountMinor,
+    required this.offerTitleAr,
+    required this.offerTitleEn,
     required this.lineTotalMinor,
     required this.available,
     required this.unavailableReason,
   });
 
   factory CartLine.fromJson(Map<String, dynamic> json) {
+    final unitBaseMinor = asInt(json['unitBaseMinor']);
+    final unitOptionsMinor = asInt(json['unitOptionsMinor']);
     return CartLine(
       id: asString(json['id']),
       menuItemId: asString(json['menuItemId']),
@@ -60,9 +66,16 @@ class CartLine {
       quantity: asInt(json['quantity'], 1),
       notes: asString(json['notes']),
       options: mapList(json['options'], CartLineOption.fromJson),
-      unitBaseMinor: asInt(json['unitBaseMinor']),
-      unitOptionsMinor: asInt(json['unitOptionsMinor']),
+      unitBaseMinor: unitBaseMinor,
+      unitOptionsMinor: unitOptionsMinor,
+      unitOriginalMinor: asInt(
+        json['unitOriginalMinor'],
+        unitBaseMinor + unitOptionsMinor,
+      ),
       unitTotalMinor: asInt(json['unitTotalMinor']),
+      offerDiscountMinor: asInt(json['offerDiscountMinor']),
+      offerTitleAr: asStringOrNull(json['offerTitleAr']),
+      offerTitleEn: asStringOrNull(json['offerTitleEn']),
       lineTotalMinor: asInt(json['lineTotalMinor']),
       available: asBool(json['available'], true),
       unavailableReason: asStringOrNull(json['unavailableReason']),
@@ -78,12 +91,26 @@ class CartLine {
   final List<CartLineOption> options;
   final int unitBaseMinor;
   final int unitOptionsMinor;
+  final int unitOriginalMinor;
   final int unitTotalMinor;
+  final int offerDiscountMinor;
+  final String? offerTitleAr;
+  final String? offerTitleEn;
   final int lineTotalMinor;
   final bool available;
   final String? unavailableReason;
 
   String optionsSummary(bool arabic) => options.map((o) => o.name(arabic)).join(' • ');
+
+  bool get hasOffer => unitOriginalMinor > unitTotalMinor;
+  int get unitDiscountMinor => unitOriginalMinor - unitTotalMinor;
+
+  String? offerTitle(bool arabic) {
+    final ar = offerTitleAr ?? '';
+    final en = offerTitleEn ?? '';
+    final value = arabic ? ar : (en.isEmpty ? ar : en);
+    return value.isEmpty ? null : value;
+  }
 }
 
 class AppliedCoupon {
@@ -150,6 +177,8 @@ class CartQuote {
     required this.lines,
     required this.itemCount,
     required this.subtotalMinor,
+    required this.subtotalOriginalMinor,
+    required this.offerDiscountMinor,
     required this.deliveryFeeMinor,
     required this.deliveryFeeOriginalMinor,
     required this.discountMinor,
@@ -177,6 +206,11 @@ class CartQuote {
       lines: mapList(json['lines'], CartLine.fromJson),
       itemCount: asInt(json['itemCount']),
       subtotalMinor: asInt(json['subtotalMinor']),
+      subtotalOriginalMinor: asInt(
+        json['subtotalOriginalMinor'],
+        asInt(json['subtotalMinor']),
+      ),
+      offerDiscountMinor: asInt(json['offerDiscountMinor']),
       deliveryFeeMinor: asInt(json['deliveryFeeMinor']),
       deliveryFeeOriginalMinor: asInt(json['deliveryFeeOriginalMinor']),
       discountMinor: asInt(json['discountMinor']),
@@ -203,6 +237,8 @@ class CartQuote {
   final List<CartLine> lines;
   final int itemCount;
   final int subtotalMinor;
+  final int subtotalOriginalMinor;
+  final int offerDiscountMinor;
   final int deliveryFeeMinor;
   final int deliveryFeeOriginalMinor;
   final int discountMinor;

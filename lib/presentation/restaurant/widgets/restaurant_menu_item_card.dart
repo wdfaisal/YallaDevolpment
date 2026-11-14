@@ -77,31 +77,7 @@ class RestaurantMenuItemCard extends StatelessWidget {
                     Row(
                       children: [
                         Expanded(
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.baseline,
-                            textBaseline: TextBaseline.alphabetic,
-                            children: [
-                              Flexible(
-                                child: Text(
-                                  Fmt.money(item.priceMinor),
-                                  style: AppTypography.headlineMd.copyWith(
-                                    color: AppColors.primary,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                l10n.currencyDefault,
-                                style: AppTypography.labelMd.copyWith(
-                                  color: AppColors.secondary,
-                                ),
-                              ),
-                            ],
-                          ),
+                          child: _PriceBlock(item: item, l10n: l10n),
                         ),
                         const SizedBox(width: 8),
                         _QuantityStepper(
@@ -175,6 +151,77 @@ class RestaurantMenuItemCard extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _PriceBlock extends StatelessWidget {
+  const _PriceBlock({required this.item, required this.l10n});
+
+  final CatalogMenuItem item;
+  final L10n l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
+          children: [
+            Flexible(
+              child: Text(
+                Fmt.money(item.effectivePriceMinor),
+                style: AppTypography.headlineMd.copyWith(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w700,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const SizedBox(width: 4),
+            Text(
+              l10n.currencyDefault,
+              style: AppTypography.labelMd.copyWith(
+                color: AppColors.secondary,
+              ),
+            ),
+          ],
+        ),
+        if (item.hasOffer) ...[
+          const SizedBox(height: 2),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                Fmt.money(item.priceMinor),
+                style: AppTypography.labelMd.copyWith(
+                  color: AppColors.secondary,
+                  decoration: TextDecoration.lineThrough,
+                ),
+              ),
+              const SizedBox(width: 6),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                decoration: BoxDecoration(
+                  color: AppColors.orangeTintSoft,
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
+                ),
+                child: Text(
+                  '${item.offerDiscountPercent ?? 0}%',
+                  style: AppTypography.labelSm.copyWith(
+                    color: AppColors.primary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ],
     );
   }
 }

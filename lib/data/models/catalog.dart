@@ -345,6 +345,10 @@ class CatalogMenuItem {
     required this.name,
     required this.description,
     required this.priceMinor,
+    required this.offerPriceMinor,
+    required this.offerTitleAr,
+    required this.offerTitleEn,
+    required this.offerDiscountPercent,
     required this.available,
     required this.prepMinutes,
     required this.imageUrls,
@@ -364,6 +368,10 @@ class CatalogMenuItem {
       name: asString(json['name']),
       description: asString(json['description']),
       priceMinor: asInt(json['priceMinor']),
+      offerPriceMinor: asIntOrNull(json['offerPriceMinor']),
+      offerTitleAr: asStringOrNull(json['offerTitleAr']),
+      offerTitleEn: asStringOrNull(json['offerTitleEn']),
+      offerDiscountPercent: asIntOrNull(json['offerDiscountPercent']),
       available: asBool(json['available']),
       prepMinutes: asInt(json['prepMinutes']),
       imageUrls: (json['imageUrls'] as List?)?.map((e) => e.toString()).toList() ?? const [],
@@ -382,6 +390,10 @@ class CatalogMenuItem {
   final String name;
   final String description;
   final int priceMinor;
+  final int? offerPriceMinor;
+  final String? offerTitleAr;
+  final String? offerTitleEn;
+  final int? offerDiscountPercent;
   final bool available;
   final int prepMinutes;
   final List<String> imageUrls;
@@ -393,6 +405,17 @@ class CatalogMenuItem {
   String? get imageUrl => imageUrls.isEmpty ? null : imageUrls.first;
   String? badge(bool arabic) => arabic ? badgeAr : badgeEn;
   bool get hasOptions => optionGroups.isNotEmpty;
+
+  /// Effective unit price after any live offer.
+  int get effectivePriceMinor => offerPriceMinor ?? priceMinor;
+  bool get hasOffer =>
+      offerPriceMinor != null && offerPriceMinor! < priceMinor;
+  String? offerTitle(bool arabic) {
+    final ar = offerTitleAr ?? '';
+    final en = offerTitleEn ?? '';
+    final value = arabic ? ar : (en.isEmpty ? ar : en);
+    return value.isEmpty ? null : value;
+  }
 }
 
 class CatalogMenuCategory {
