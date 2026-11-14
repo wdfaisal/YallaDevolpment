@@ -645,6 +645,44 @@ class L10n {
       _t('تحتاج مساعدة بهذا الطلب؟', 'Need help with this order?');
   String get yourRating => _t('تقييمك', 'Your rating');
 
+  // Live tracking (Stitch redesign)
+  String get trackOrderTitle => _t('تتبع الطلب', 'Track order');
+  String get currentOrderStatus =>
+      _t('حالة الطلب الحالية', 'Current order status');
+  String get inProgress => _t('مستمر', 'In progress');
+  String get liveNow => _t('مباشر', 'Live');
+  String get arrivingIn => _t('يصل خلال', 'Arriving in');
+  String get deliverySoon => _t('قريباً', 'Soon');
+  String get findingDriver =>
+      _t('جارٍ تعيين كابتن التوصيل', 'Finding a delivery captain');
+  String get driverOnTheWay =>
+      _t('الكابتن في الطريق إليك', 'Your captain is on the way');
+  String get yallaCaptain =>
+      _t('كابتن توصيل يلا المعتمد', 'Yalla certified delivery captain');
+  String get movingNow => _t('متحرك', 'Moving');
+  String get recenterMap =>
+      _t('إعادة ضبط الخريطة', 'Recenter map');
+  String get mapUnavailable => _t(
+        'لا تتوفر إحداثيات لهذا الطلب على الخريطة',
+        'No map coordinates are available for this order',
+      );
+  String get mapAttribution => '© OpenStreetMap';
+  String get fullReceipt => _t('الفاتورة الكاملة', 'Full receipt');
+  String get deliveredAndReceived =>
+      _t('تم التسليم والاستلام', 'Delivered & received');
+  String get deliveredSoonDetail =>
+      _t('بالعافية مقدماً!', 'Enjoy your meal!');
+  String get plateLabel => _t('لوحة', 'Plate');
+  String get itemsFromRestaurant => _t('أصناف من', 'items from');
+  String get totalPaid => _t('المجموع الكلي المدفوع', 'Total paid');
+  String get shareReceipt => _t('مشاركة الفاتورة', 'Share receipt');
+  String get safetyGuaranteeTitle =>
+      _t('ضمان يلا السريع والأمان', 'Yalla speed & safety guarantee');
+  String get safetyGuaranteeBody => _t(
+        'الوجبة محفوظة في حقيبة حرارية مغلقة ومطابقة لمعايير الجودة والسلامة حتى باب منزلك.',
+        'Your meal stays sealed in an insulated bag and meets quality and safety standards until it reaches your door.',
+      );
+
   // Address extras
   String get addNewAddress => _t('إضافة عنوان جديد', 'Add a new address');
   String get editAddress => _t('تعديل العنوان', 'Edit address');

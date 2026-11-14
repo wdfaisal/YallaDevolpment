@@ -238,6 +238,7 @@ class OrderDetail {
     required this.discountMinor,
     required this.deliveryAddress,
     required this.deliveryPosition,
+    required this.restaurantPosition,
     required this.note,
     required this.couponCode,
     required this.payments,
@@ -258,6 +259,9 @@ class OrderDetail {
       deliveryAddress: asString(json['deliveryAddress']),
       deliveryPosition:
           json['deliveryPosition'] == null ? null : GeoPoint.fromJson(asMap(json['deliveryPosition'])),
+      restaurantPosition: json['restaurantPosition'] == null
+          ? null
+          : GeoPoint.fromJson(asMap(json['restaurantPosition'])),
       note: asString(json['note']),
       couponCode: asStringOrNull(json['couponCode']),
       payments: mapList(json['payments'], PaymentPart.fromJson),
@@ -276,6 +280,7 @@ class OrderDetail {
   final int discountMinor;
   final String deliveryAddress;
   final GeoPoint? deliveryPosition;
+  final GeoPoint? restaurantPosition;
   final String note;
   final String? couponCode;
   final List<PaymentPart> payments;

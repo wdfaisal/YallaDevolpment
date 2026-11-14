@@ -57,6 +57,7 @@ class AppColors {
   static const Color orangeContainerActive = Color(0xFFFFDBD0);
   static const Color borderSubtle = Color(0xFFF1F4F9);
   static const Color borderMuted = Color(0xFFE4BEB3);
+  static const Color borderHairline = Color(0xFFEEEEEE);
   static const Color textMuted = Color(0xFF5B4038);
 
   /// Profile/account screen accent from the Stitch profile design. Kept

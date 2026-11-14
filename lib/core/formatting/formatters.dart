@@ -75,6 +75,16 @@ class Fmt {
     return '${local.year}-${two(local.month)}-${two(local.day)} ${two(local.hour)}:${two(local.minute)}';
   }
 
+  /// Time of day only (HH:mm) for timeline entries.
+  static String time(String? iso) {
+    if (iso == null) return '—';
+    final parsed = DateTime.tryParse(iso);
+    if (parsed == null) return '—';
+    final local = parsed.toLocal();
+    String two(int value) => value.toString().padLeft(2, '0');
+    return '${two(local.hour)}:${two(local.minute)}';
+  }
+
   static String date(String? iso) {
     if (iso == null) return '—';
     final parsed = DateTime.tryParse(iso);

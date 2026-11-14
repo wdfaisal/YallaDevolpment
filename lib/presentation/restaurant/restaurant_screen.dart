@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../core/design/app_colors.dart';
 import '../../core/design/app_spacing.dart';
+import '../../core/design/app_system_ui.dart';
 import '../../core/design/app_typography.dart';
 import '../../core/localization/l10n.dart';
 import '../../core/widgets/snack.dart';
@@ -69,23 +71,28 @@ class _RestaurantScreenState extends ConsumerState<RestaurantScreen> {
     final cart = ref.watch(cartProvider).valueOrNull;
     final data = detail.valueOrNull;
 
-    return Scaffold(
-      backgroundColor: AppColors.surfaceContainerLowest,
-      body: AsyncView(
-        value: detail,
-        onRetry: () => ref
-            .read(restaurantDetailProvider(widget.restaurantId).notifier)
-            .refresh(),
-        builder: (detail) => _content(context, l10n, detail, cart),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      // The hero photo sits under the notch, so default to light icons; the
+      // pinned top bar overrides this while its white surface is visible.
+      value: AppSystemUi.overDark,
+      child: Scaffold(
+        backgroundColor: AppColors.surfaceContainerLowest,
+        body: AsyncView(
+          value: detail,
+          onRetry: () => ref
+              .read(restaurantDetailProvider(widget.restaurantId).notifier)
+              .refresh(),
+          builder: (detail) => _content(context, l10n, detail, cart),
+        ),
+        bottomNavigationBar: data == null || cart == null
+            ? null
+            : RestaurantCartTray(
+                cart: cart,
+                restaurantId: data.restaurant.id,
+                l10n: l10n,
+                onCheckout: () => context.push('/cart'),
+              ),
       ),
-      bottomNavigationBar: data == null || cart == null
-          ? null
-          : RestaurantCartTray(
-              cart: cart,
-              restaurantId: data.restaurant.id,
-              l10n: l10n,
-              onCheckout: () => context.push('/cart'),
-            ),
     );
   }
 

@@ -1,8 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../core/design/app_colors.dart';
 import '../../../core/design/app_spacing.dart';
+import '../../../core/design/app_system_ui.dart';
 import '../../../core/design/app_typography.dart';
 import '../../../core/localization/l10n.dart';
 import '../../../core/widgets/favorite_button.dart';
@@ -43,65 +45,74 @@ class RestaurantTopBar extends StatelessWidget {
       builder: (context, offset, _) {
         final background = ((offset - 8) / 48).clamp(0.0, 1.0);
         final titleProgress = ((offset - titleStart) / 28).clamp(0.0, 1.0);
-        return Container(
-          height: topInset + contentHeight,
-          padding: EdgeInsetsDirectional.only(
-            top: topInset,
-            start: AppSpacing.lg,
-            end: AppSpacing.lg,
-          ),
-          decoration: BoxDecoration(
-            color: AppColors.surfaceContainerLowest.withValues(
-              alpha: background,
+        // The bar covers the status bar. While it is still transparent the
+        // cover photo shows through the notch, so the clock/battery icons must
+        // be light; once the white surface fades in they switch back to dark.
+        final statusBarStyle = background < 0.35
+            ? AppSystemUi.overDark
+            : AppSystemUi.light;
+        return AnnotatedRegion<SystemUiOverlayStyle>(
+          value: statusBarStyle,
+          child: Container(
+            height: topInset + contentHeight,
+            padding: EdgeInsetsDirectional.only(
+              top: topInset,
+              start: AppSpacing.lg,
+              end: AppSpacing.lg,
             ),
-            border: Border(
-              bottom: BorderSide(
-                color: AppColors.borderSubtle.withValues(alpha: background),
+            decoration: BoxDecoration(
+              color: AppColors.surfaceContainerLowest.withValues(
+                alpha: background,
+              ),
+              border: Border(
+                bottom: BorderSide(
+                  color: AppColors.borderSubtle.withValues(alpha: background),
+                ),
               ),
             ),
-          ),
-          child: Row(
-            children: [
-              _BarIconButton(
-                // `arrow_back` mirrors to a right-pointing arrow in RTL.
-                icon: Icons.arrow_back,
-                tooltip: l10n.back,
-                onTap: onBack,
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              Expanded(
-                child: titleProgress <= 0
-                    ? const SizedBox.shrink()
-                    : Opacity(
-                        opacity: titleProgress,
-                        child: Transform.translate(
-                          offset: Offset(0, (1 - titleProgress) * 8),
-                          child: Text(
-                            title,
-                            style: AppTypography.headlineSm.copyWith(
-                              fontSize: 16,
+            child: Row(
+              children: [
+                _BarIconButton(
+                  // `arrow_back` mirrors to a right-pointing arrow in RTL.
+                  icon: Icons.arrow_back,
+                  tooltip: l10n.back,
+                  onTap: onBack,
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: titleProgress <= 0
+                      ? const SizedBox.shrink()
+                      : Opacity(
+                          opacity: titleProgress,
+                          child: Transform.translate(
+                            offset: Offset(0, (1 - titleProgress) * 8),
+                            child: Text(
+                              title,
+                              style: AppTypography.headlineSm.copyWith(
+                                fontSize: 16,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                      ),
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              _BarIconButton(
-                icon: Icons.share_outlined,
-                tooltip: l10n.shareRestaurant,
-                onTap: onShare,
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              FavoriteButton(
-                targetType: 'restaurant',
-                targetId: restaurantId,
-                size: buttonSize,
-                background: AppColors.surfaceContainerLowest,
-                borderColor: AppColors.borderSubtle,
-              ),
-            ],
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                _BarIconButton(
+                  icon: Icons.share_outlined,
+                  tooltip: l10n.shareRestaurant,
+                  onTap: onShare,
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                FavoriteButton(
+                  targetType: 'restaurant',
+                  targetId: restaurantId,
+                  size: buttonSize,
+                  background: AppColors.surfaceContainerLowest,
+                  borderColor: AppColors.borderSubtle,
+                ),
+              ],
+            ),
           ),
         );
       },
