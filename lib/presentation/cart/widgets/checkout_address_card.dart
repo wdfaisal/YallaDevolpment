@@ -80,8 +80,9 @@ class CheckoutAddressCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(AppSpacing.sm),
               decoration: BoxDecoration(
-                color: AppColors.surfaceContainerLow,
+                color: AppColors.surfaceContainerLowest,
                 borderRadius: BorderRadius.circular(AppSpacing.radius),
+                border: Border.all(color: AppColors.borderSubtle),
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -92,6 +93,7 @@ class CheckoutAddressCard extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: AppColors.surfaceContainerLowest,
                       borderRadius: BorderRadius.circular(AppSpacing.radius),
+                      border: Border.all(color: AppColors.borderSubtle),
                     ),
                     child: const Icon(
                       Icons.home_outlined,

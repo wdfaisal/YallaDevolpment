@@ -18,6 +18,7 @@ class CheckoutItemsSection extends StatelessWidget {
     required this.onQuantity,
     required this.onRemove,
     this.onEdit,
+    this.descriptions = const {},
   });
 
   final CartResponse cart;
@@ -26,6 +27,9 @@ class CheckoutItemsSection extends StatelessWidget {
   final void Function(CartLine line, int quantity) onQuantity;
   final void Function(CartLine line) onRemove;
   final VoidCallback? onEdit;
+
+  /// Menu item id → catalog description, sourced from the restaurant detail.
+  final Map<String, String> descriptions;
 
   @override
   Widget build(BuildContext context) {
@@ -65,6 +69,7 @@ class CheckoutItemsSection extends StatelessWidget {
             line: line,
             currency: currency,
             l10n: l10n,
+            description: descriptions[line.menuItemId],
             onQuantity: (value) => onQuantity(line, value),
             onRemove: () => onRemove(line),
           ),
@@ -73,18 +78,18 @@ class CheckoutItemsSection extends StatelessWidget {
         if (onEdit != null)
           SizedBox(
             width: double.infinity,
-            height: 48,
+            height: 40,
             child: Material(
               color: AppColors.surfaceContainerLowest,
-              borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+              borderRadius: BorderRadius.circular(AppSpacing.radius),
               child: InkWell(
-                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                borderRadius: BorderRadius.circular(AppSpacing.radius),
                 onTap: onEdit,
                 child: Container(
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                    borderRadius: BorderRadius.circular(AppSpacing.radius),
                     border: Border.all(
-                      color: AppColors.primary.withValues(alpha: 0.2),
+                      color: AppColors.primary.withValues(alpha: 0.25),
                     ),
                   ),
                   child: Row(
@@ -92,14 +97,14 @@ class CheckoutItemsSection extends StatelessWidget {
                     children: [
                       const Icon(
                         Icons.add_circle_outline,
-                        size: 20,
+                        size: 18,
                         color: AppColors.primary,
                       ),
                       const SizedBox(width: AppSpacing.xs),
                       Flexible(
                         child: Text(
                           l10n.addMoreFromRestaurant,
-                          style: AppTypography.labelLg.copyWith(
+                          style: AppTypography.labelMd.copyWith(
                             color: AppColors.primary,
                           ),
                           maxLines: 1,

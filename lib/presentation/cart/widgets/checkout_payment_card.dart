@@ -53,7 +53,11 @@ class CheckoutPaymentCard extends StatelessWidget {
         selectedOption.first.requiresReference;
     final border = OutlineInputBorder(
       borderRadius: BorderRadius.circular(AppSpacing.radius),
-      borderSide: BorderSide.none,
+      borderSide: const BorderSide(color: AppColors.borderSubtle),
+    );
+    final focusedBorder = OutlineInputBorder(
+      borderRadius: BorderRadius.circular(AppSpacing.radius),
+      borderSide: BorderSide(color: AppColors.primary.withValues(alpha: 0.4)),
     );
 
     return CheckoutSectionCard(
@@ -123,7 +127,7 @@ class CheckoutPaymentCard extends StatelessWidget {
                     color: AppColors.secondary,
                   ),
                   filled: true,
-                  fillColor: AppColors.surfaceContainerLow,
+                  fillColor: AppColors.surfaceContainerLowest,
                   isDense: true,
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: AppSpacing.sm,
@@ -131,7 +135,7 @@ class CheckoutPaymentCard extends StatelessWidget {
                   ),
                   border: border,
                   enabledBorder: border,
-                  focusedBorder: border,
+                  focusedBorder: focusedBorder,
                 ),
               ),
             ],
@@ -170,9 +174,7 @@ class _PaymentOptionTile extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: AppSpacing.xs),
         padding: const EdgeInsets.all(AppSpacing.sm),
         decoration: BoxDecoration(
-          color: selected
-              ? AppColors.surfaceContainerLow
-              : AppColors.surfaceContainerLowest,
+          color: AppColors.surfaceContainerLowest,
           borderRadius: BorderRadius.circular(AppSpacing.radius),
           border: Border.all(
             color: selected
@@ -194,16 +196,14 @@ class _PaymentOptionTile extends StatelessWidget {
               width: 32,
               height: 32,
               decoration: BoxDecoration(
-                color: selected
-                    ? AppColors.inverseSurface
-                    : AppColors.surfaceContainerHigh,
+                color: AppColors.surfaceContainerLowest,
                 borderRadius: BorderRadius.circular(AppSpacing.radius),
+                border: Border.all(color: AppColors.borderSubtle),
               ),
               child: Icon(
                 _icon(),
                 size: 20,
-                color:
-                    selected ? AppColors.inverseOnSurface : AppColors.onSurface,
+                color: selected ? AppColors.primary : AppColors.onSurface,
               ),
             ),
             const SizedBox(width: AppSpacing.sm),

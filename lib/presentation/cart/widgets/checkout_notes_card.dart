@@ -21,7 +21,11 @@ class CheckoutNotesCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final border = OutlineInputBorder(
       borderRadius: BorderRadius.circular(AppSpacing.radius),
-      borderSide: BorderSide.none,
+      borderSide: const BorderSide(color: AppColors.borderSubtle),
+    );
+    final focusedBorder = OutlineInputBorder(
+      borderRadius: BorderRadius.circular(AppSpacing.radius),
+      borderSide: BorderSide(color: AppColors.primary.withValues(alpha: 0.4)),
     );
     return CheckoutSectionCard(
       child: Column(
@@ -45,11 +49,11 @@ class CheckoutNotesCard extends StatelessWidget {
                 color: AppColors.secondary,
               ),
               filled: true,
-              fillColor: AppColors.surfaceContainerLow,
+              fillColor: AppColors.surfaceContainerLowest,
               contentPadding: const EdgeInsets.all(AppSpacing.sm),
               border: border,
               enabledBorder: border,
-              focusedBorder: border,
+              focusedBorder: focusedBorder,
               counterText: '',
             ),
           ),

@@ -11,7 +11,7 @@ import '../../state/cart_controller.dart';
 import '../../state/session_controller.dart';
 import 'sheets.dart';
 
-/// Standard 64px page header. Owns no safe-area padding: [AppScaffold] already
+/// Compact 60px page header. Owns no safe-area padding: [AppScaffold] already
 /// wraps the header in a top [SafeArea].
 class SimpleHeader extends StatelessWidget {
   const SimpleHeader({
@@ -32,7 +32,7 @@ class SimpleHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 64,
+      height: 60,
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       decoration: const BoxDecoration(
         color: AppColors.surfaceContainerLowest,
@@ -41,7 +41,7 @@ class SimpleHeader extends StatelessWidget {
       child: Row(
         children: [
           if (showBack)
-            _CircleButton(
+            _BackButton(
               // `arrow_back` carries matchTextDirection, so in RTL it renders
               // pointing right — the correct "back" affordance for this app.
               icon: Icons.arrow_back,
@@ -49,8 +49,8 @@ class SimpleHeader extends StatelessWidget {
               onTap: onBack ?? () => Navigator.of(context).maybePop(),
             )
           else
-            const SizedBox(width: AppSpacing.minTapTarget),
-          const SizedBox(width: AppSpacing.md),
+            const SizedBox(width: _backButtonSize),
+          const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -58,14 +58,15 @@ class SimpleHeader extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: AppTypography.headlineSm,
+                  style: AppTypography.headlineSm.copyWith(fontSize: 16),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 if (subtitle != null)
                   Text(
                     subtitle!,
-                    style: AppTypography.bodySm.copyWith(color: AppColors.secondary),
+                    style: AppTypography.bodySm
+                        .copyWith(color: AppColors.secondary),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -73,15 +74,19 @@ class SimpleHeader extends StatelessWidget {
             ),
           ),
           ...actions,
-          const SizedBox(width: AppSpacing.xs),
+          // Keeps the title balanced against the back button on the other edge.
+          if (actions.isEmpty) const SizedBox(width: _backButtonSize),
         ],
       ),
     );
   }
 }
 
-class _CircleButton extends StatelessWidget {
-  const _CircleButton({required this.icon, required this.onTap, this.tooltip});
+/// 40px transparent button with rounded corners — flat, no fill and no shadow.
+const double _backButtonSize = 40;
+
+class _BackButton extends StatelessWidget {
+  const _BackButton({required this.icon, required this.onTap, this.tooltip});
 
   final IconData icon;
   final VoidCallback onTap;
@@ -92,12 +97,16 @@ class _CircleButton extends StatelessWidget {
     return Tooltip(
       message: tooltip ?? '',
       child: InkWell(
-        borderRadius: BorderRadius.circular(AppSpacing.minTapTarget / 2),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
         onTap: onTap,
-        child: SizedBox(
-          width: AppSpacing.minTapTarget,
-          height: AppSpacing.minTapTarget,
-          child: Icon(icon, size: 24, color: AppColors.onSurface),
+        child: Container(
+          width: _backButtonSize,
+          height: _backButtonSize,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+            border: Border.all(color: AppColors.borderSubtle),
+          ),
+          child: Icon(icon, size: 20, color: AppColors.onSurface),
         ),
       ),
     );
@@ -142,13 +151,15 @@ class HeaderIconButton extends StatelessWidget {
               decoration: BoxDecoration(
                 color: filled ? AppColors.orangeTintSubtle : Colors.transparent,
                 shape: BoxShape.circle,
-                border: filled ? Border.all(color: AppColors.borderMuted) : null,
+                border:
+                    filled ? Border.all(color: AppColors.borderMuted) : null,
                 boxShadow: filled && showShadow ? AppColors.cardShadow : null,
               ),
               child: Icon(
                 icon,
                 size: iconSize,
-                color: iconColor ?? (filled ? AppColors.primary : AppColors.onSurface),
+                color: iconColor ??
+                    (filled ? AppColors.primary : AppColors.onSurface),
               ),
             ),
             if (badge > 0)
@@ -194,7 +205,8 @@ class AddressChip extends ConsumerWidget {
     final l10n = L10n.of(context);
     final signedIn = ref.watch(isSignedInProvider);
     final address = ref.watch(selectedAddressProvider);
-    final label = address?.label ?? (signedIn ? l10n.chooseAddress : l10n.deliverTo);
+    final label =
+        address?.label ?? (signedIn ? l10n.chooseAddress : l10n.deliverTo);
     final singleLineLabel = address?.label ?? l10n.chooseAddress;
     final detail = address?.address;
 
@@ -289,7 +301,8 @@ class AddressChip extends ConsumerWidget {
 
 /// Cart shortcut with live item count.
 class CartHeaderButton extends ConsumerWidget {
-  const CartHeaderButton({super.key, this.filled = false, this.showShadow = true});
+  const CartHeaderButton(
+      {super.key, this.filled = false, this.showShadow = true});
 
   final bool filled;
   final bool showShadow;

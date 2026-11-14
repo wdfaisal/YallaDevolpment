@@ -4,7 +4,7 @@ import 'package:yalla_talabat_customer/data/models/cart.dart';
 import 'package:yalla_talabat_customer/data/models/catalog.dart';
 import 'package:yalla_talabat_customer/presentation/restaurant/restaurant_screen.dart';
 import 'package:yalla_talabat_customer/presentation/restaurant/widgets/restaurant_cart_tray.dart';
-import 'package:yalla_talabat_customer/presentation/restaurant/widgets/restaurant_hero.dart';
+import 'package:yalla_talabat_customer/presentation/restaurant/widgets/restaurant_top_bar.dart';
 import 'package:yalla_talabat_customer/state/cart_controller.dart';
 import 'package:yalla_talabat_customer/state/restaurant_detail_controller.dart';
 
@@ -30,7 +30,7 @@ CatalogMenuItem _item(String id, String name) {
   );
 }
 
-CatalogRestaurantDetail _detail({bool withMenu = true}) {
+CatalogRestaurantDetail _detail({bool withMenu = true, int itemCount = 2}) {
   return CatalogRestaurantDetail(
     restaurant: const CatalogRestaurant(
       id: 'res_1',
@@ -64,8 +64,8 @@ CatalogRestaurantDetail _detail({bool withMenu = true}) {
               name: 'أخرى',
               position: 0,
               items: [
-                _item('item_1', 'برجر دجاج'),
-                _item('item_2', 'برجر لحم'),
+                for (var i = 0; i < itemCount; i++)
+                  _item('item_$i', 'برجر دجاج $i'),
               ],
             ),
           ]
@@ -126,16 +126,49 @@ void main() {
 
     expect(tester.takeException(), isNull);
     final backIcon = find.descendant(
-      of: find.byType(RestaurantHero),
+      of: find.byType(RestaurantTopBar),
       matching: find.byIcon(Icons.arrow_back),
     );
     expect(backIcon, findsOneWidget);
     // Material mirrors `arrow_back` in RTL, so it renders pointing right.
     expect(Directionality.of(tester.element(backIcon)), TextDirection.rtl);
     expect(find.text('البيك -Albak'), findsOneWidget);
+    // The bar title only appears once the meta title scrolls under the bar.
+    expect(
+      find.descendant(
+        of: find.byType(RestaurantTopBar),
+        matching: find.text('البيك -Albak'),
+      ),
+      findsNothing,
+    );
     expect(find.text('أخرى'), findsWidgets);
-    expect(find.text('برجر دجاج'), findsOneWidget);
+    expect(find.text('برجر دجاج 0'), findsOneWidget);
     expect(find.text('15,800'), findsWidgets);
+  });
+
+  testWidgets('the top bar picks up the title while scrolling', (tester) async {
+    await _pumpScreen(tester, _detail(itemCount: 20));
+
+    final controller = tester
+        .widget<CustomScrollView>(find.byType(CustomScrollView))
+        .controller!;
+    controller.jumpTo(320);
+    await tester.pumpAndSettle();
+
+    expect(
+      find.descendant(
+        of: find.byType(RestaurantTopBar),
+        matching: find.text('البيك -Albak'),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: find.byType(RestaurantTopBar),
+        matching: find.byIcon(Icons.arrow_back),
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('the body keeps its height above the cart tray', (tester) async {

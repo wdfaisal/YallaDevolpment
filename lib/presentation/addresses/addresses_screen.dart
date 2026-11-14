@@ -153,7 +153,8 @@ class _AddressCard extends StatelessWidget {
           color: AppColors.surfaceContainerLowest,
           borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
           border: Border.all(
-            color: selected ? AppColors.primary : AppColors.surfaceContainerHigh,
+            color:
+                selected ? AppColors.primary : AppColors.surfaceContainerHigh,
             width: selected ? 1.4 : 1,
           ),
           boxShadow: AppColors.cardShadow,

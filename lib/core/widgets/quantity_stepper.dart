@@ -4,6 +4,9 @@ import '../design/app_colors.dart';
 import '../design/app_spacing.dart';
 import '../design/app_typography.dart';
 
+/// Quantity pill used by the cart and the restaurant menu. Pure white with a
+/// hairline border; the `+` control is outlined instead of filled so the pill
+/// stays flat against the white checkout canvas.
 class QuantityStepper extends StatelessWidget {
   const QuantityStepper({
     super.key,
@@ -25,8 +28,9 @@ class QuantityStepper extends StatelessWidget {
     final dimension = compact ? 30.0 : 38.0;
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surfaceContainerLow,
+        color: AppColors.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
+        border: Border.all(color: AppColors.borderSubtle),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -42,7 +46,8 @@ class QuantityStepper extends StatelessWidget {
             child: Text(
               '$value',
               textAlign: TextAlign.center,
-              style: AppTypography.labelLg.copyWith(fontWeight: FontWeight.w700),
+              style:
+                  AppTypography.labelLg.copyWith(fontWeight: FontWeight.w700),
             ),
           ),
           _button(
@@ -50,7 +55,7 @@ class QuantityStepper extends StatelessWidget {
             enabled: value < max,
             onTap: () => onChanged(value + 1),
             dimension: dimension,
-            filled: true,
+            outlined: true,
           ),
         ],
       ),
@@ -62,7 +67,7 @@ class QuantityStepper extends StatelessWidget {
     required bool enabled,
     required VoidCallback onTap,
     required double dimension,
-    bool filled = false,
+    bool outlined = false,
   }) {
     return InkWell(
       borderRadius: BorderRadius.circular(dimension),
@@ -71,14 +76,21 @@ class QuantityStepper extends StatelessWidget {
         width: dimension,
         height: dimension,
         decoration: BoxDecoration(
-          color: filled ? AppColors.primaryContainer : Colors.transparent,
+          color: AppColors.surfaceContainerLowest,
           shape: BoxShape.circle,
+          border: outlined
+              ? Border.all(
+                  color: enabled
+                      ? AppColors.primary.withValues(alpha: 0.4)
+                      : AppColors.borderSubtle,
+                )
+              : null,
         ),
         child: Icon(
           icon,
           size: dimension * 0.5,
-          color: filled
-              ? AppColors.onPrimary
+          color: outlined
+              ? (enabled ? AppColors.primary : AppColors.surfaceDim)
               : (enabled ? AppColors.onSurface : AppColors.surfaceDim),
         ),
       ),

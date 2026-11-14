@@ -8,8 +8,11 @@ import 'package:yalla_talabat_customer/data/models/catalog.dart';
 import 'package:yalla_talabat_customer/data/models/customer.dart';
 import 'package:yalla_talabat_customer/presentation/cart/widgets/checkout_address_card.dart';
 import 'package:yalla_talabat_customer/presentation/cart/widgets/checkout_bottom_tray.dart';
+import 'package:yalla_talabat_customer/presentation/cart/widgets/checkout_coupon_card.dart';
 import 'package:yalla_talabat_customer/presentation/cart/widgets/checkout_free_delivery_banner.dart';
+import 'package:yalla_talabat_customer/presentation/cart/widgets/checkout_fulfillment_card.dart';
 import 'package:yalla_talabat_customer/presentation/cart/widgets/checkout_item_card.dart';
+import 'package:yalla_talabat_customer/presentation/cart/widgets/checkout_items_section.dart';
 import 'package:yalla_talabat_customer/presentation/cart/widgets/checkout_payment_card.dart';
 import 'package:yalla_talabat_customer/presentation/cart/widgets/checkout_restaurant_card.dart';
 import 'package:yalla_talabat_customer/presentation/cart/widgets/checkout_summary_card.dart';
@@ -18,31 +21,36 @@ import 'support/test_app.dart';
 
 const _l10n = L10n(true);
 
-CatalogRestaurant _restaurant() {
-  return const CatalogRestaurant(
+CatalogRestaurant _restaurant({
+  double rating = 4.8,
+  int ratingCount = 1200,
+  double? distanceKm = 2.4,
+  int? etaMinutes = 25,
+}) {
+  return CatalogRestaurant(
     id: 'res_1',
     name: 'برجر بوتيك',
     cuisine: 'برجر',
-    rating: 4.8,
-    ratingCount: 1200,
+    rating: rating,
+    ratingCount: ratingCount,
     logoUrl: '/api/media/images/logo.png',
     bannerUrl: null,
     accepting: true,
     openNow: true,
     statusLabel: 'open',
     prepMinutes: 20,
-    distanceKm: 2.4,
+    distanceKm: distanceKm,
     deliveryFeeMinor: 600,
     minOrderMinor: 0,
-    etaMinutes: 25,
+    etaMinutes: etaMinutes,
     offerCount: 0,
-    categories: [],
+    categories: const [],
   );
 }
 
-CatalogRestaurantDetail _detail() {
+CatalogRestaurantDetail _detail({CatalogRestaurant? restaurant}) {
   return CatalogRestaurantDetail(
-    restaurant: _restaurant(),
+    restaurant: restaurant ?? _restaurant(),
     address: 'الرياض',
     phone: '0500000000',
     opensAt: '09:00',
@@ -170,10 +178,9 @@ CustomerAddressRecord _address() {
 
 void main() {
   group('CheckoutRestaurantCard', () {
-    testWidgets('shows the live restaurant, ETA, rating and menu action', (
+    testWidgets('shows the live restaurant, ETA, distance and rating', (
       tester,
     ) async {
-      var menus = 0;
       await tester.pumpWidget(
         testApp(
           Scaffold(
@@ -182,7 +189,6 @@ void main() {
                 cart: _cart(),
                 detail: _detail(),
                 l10n: _l10n,
-                onMenuTap: () => menus++,
               ),
             ),
           ),
@@ -193,15 +199,13 @@ void main() {
       expect(find.text('مفتوح للطلبات'), findsOneWidget);
       expect(find.text('برجر بوتيك'), findsOneWidget);
       expect(find.text('25 دقيقة'), findsOneWidget);
-      expect(find.text('4.8 (+1200 تقييم)'), findsOneWidget);
+      expect(find.text('2.4 كم'), findsOneWidget);
+      expect(find.text('4.8'), findsOneWidget);
 
       final logo = tester.widget<AppImage>(find.byType(AppImage));
       expect(logo.url, '/api/media/images/logo.png');
-      expect(logo.width, 56);
-      expect(logo.height, 56);
-
-      await tester.tap(find.byTooltip('القائمة'));
-      expect(menus, 1);
+      expect(logo.width, 48);
+      expect(logo.height, 48);
     });
 
     testWidgets('shows a closed status when the API says so', (tester) async {
@@ -252,6 +256,29 @@ void main() {
       expect(find.text('مغلق'), findsOneWidget);
       expect(find.text('مفتوح للطلبات'), findsNothing);
     });
+
+    testWidgets('falls back to the new badge when there is no rating', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        testApp(
+          Scaffold(
+            body: SingleChildScrollView(
+              child: CheckoutRestaurantCard(
+                cart: _cart(),
+                detail: _detail(
+                  restaurant: _restaurant(rating: 0, ratingCount: 0),
+                ),
+                l10n: _l10n,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('جديد'), findsOneWidget);
+      expect(find.text('0.0'), findsNothing);
+    });
   });
 
   group('CheckoutItemCard', () {
@@ -291,6 +318,7 @@ void main() {
                 line: line,
                 currency: 'SAR',
                 l10n: _l10n,
+                description: 'لحم بقري مدخن مع جبنة شيدر وصلصة خاصة',
                 onQuantity: (value) => newQuantity = value,
                 onRemove: () => removed++,
               ),
@@ -300,6 +328,8 @@ void main() {
       );
 
       expect(find.text('كلاسيك سموك برجر'), findsOneWidget);
+      expect(
+          find.text('لحم بقري مدخن مع جبنة شيدر وصلصة خاصة'), findsOneWidget);
       expect(find.text('كبير • جبنة إضافية'), findsOneWidget);
       expect(find.text('بدون بصل'), findsOneWidget);
       expect(find.text('46.00'), findsOneWidget);
@@ -333,6 +363,56 @@ void main() {
       );
 
       expect(find.text('غير متاح حالياً'), findsOneWidget);
+    });
+
+    testWidgets('shows the unit price when the quantity is more than one', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        testApp(
+          Scaffold(
+            body: SingleChildScrollView(
+              child: CheckoutItemCard(
+                line: _line(quantity: 2, lineTotalMinor: 9200),
+                currency: 'SAR',
+                l10n: _l10n,
+                onQuantity: (_) {},
+                onRemove: () {},
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('46.00 SAR × 2'), findsOneWidget);
+      expect(find.text('92.00'), findsOneWidget);
+    });
+  });
+
+  group('CheckoutItemsSection', () {
+    testWidgets('passes catalog descriptions to the item cards', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        testApp(
+          Scaffold(
+            body: SingleChildScrollView(
+              child: CheckoutItemsSection(
+                cart: _cart(),
+                currency: 'SAR',
+                l10n: _l10n,
+                descriptions: const {'item_1': 'لحم بقري مدخن مع جبنة شيدر'},
+                onQuantity: (_, _) {},
+                onRemove: (_) {},
+                onEdit: () {},
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('لحم بقري مدخن مع جبنة شيدر'), findsOneWidget);
+      expect(find.text('أضف أصناف أخرى من هذا المطعم'), findsOneWidget);
     });
   });
 
@@ -525,6 +605,63 @@ void main() {
     });
   });
 
+  group('CheckoutFulfillmentCard', () {
+    testWidgets('shows the current option in a dropdown and reports changes', (
+      tester,
+    ) async {
+      String? selected;
+      await tester.pumpWidget(
+        testApp(
+          Scaffold(
+            body: SingleChildScrollView(
+              child: CheckoutFulfillmentCard(
+                fulfillment: 'delivery',
+                l10n: _l10n,
+                onChanged: (value) => selected = value,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byType(DropdownButton<String>), findsOneWidget);
+      expect(find.text('توصيل'), findsOneWidget);
+
+      await tester.tap(find.byType(DropdownButton<String>));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('استلام').last);
+      await tester.pumpAndSettle();
+
+      expect(selected, 'pickup');
+    });
+  });
+
+  group('CheckoutCouponCard', () {
+    testWidgets('uses an outlined apply button', (tester) async {
+      var applied = 0;
+      await tester.pumpWidget(
+        testApp(
+          Scaffold(
+            body: SingleChildScrollView(
+              child: CheckoutCouponCard(
+                controller: TextEditingController(),
+                quote: _quote(coupon: null, discountMinor: 0),
+                l10n: _l10n,
+                quoting: false,
+                onApply: () => applied++,
+                onRemove: () {},
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byType(OutlinedButton), findsOneWidget);
+      await tester.tap(find.text('تطبيق'));
+      expect(applied, 1);
+    });
+  });
+
   testWidgets('all checkout cards fit a 390px phone without overflow', (
     tester,
   ) async {
@@ -548,7 +685,6 @@ void main() {
                     cart: _cart(),
                     detail: _detail(),
                     l10n: _l10n,
-                    onMenuTap: () {},
                   ),
                   const SizedBox(height: 16),
                   CheckoutItemCard(

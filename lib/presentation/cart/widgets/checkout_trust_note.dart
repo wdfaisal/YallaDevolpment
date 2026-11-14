@@ -19,8 +19,9 @@ class CheckoutTrustNote extends StatelessWidget {
         vertical: AppSpacing.sm,
       ),
       decoration: BoxDecoration(
-        color: AppColors.surfaceContainerLow.withValues(alpha: 0.5),
+        color: AppColors.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(AppSpacing.radius),
+        border: Border.all(color: AppColors.borderSubtle),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,

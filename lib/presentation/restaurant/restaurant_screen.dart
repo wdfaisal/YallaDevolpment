@@ -23,6 +23,7 @@ import 'widgets/restaurant_menu_item_card.dart';
 import 'widgets/restaurant_menu_sheet.dart';
 import 'widgets/restaurant_meta_card.dart';
 import 'widgets/restaurant_offers_sheet.dart';
+import 'widgets/restaurant_top_bar.dart';
 
 /// Restaurant details & menu rebuilt from the Stitch restaurant design: a flat
 /// white surface with hairline separators instead of shadows.
@@ -38,6 +39,28 @@ class RestaurantScreen extends ConsumerStatefulWidget {
 class _RestaurantScreenState extends ConsumerState<RestaurantScreen> {
   String? _categoryId;
   final Set<String> _busyItems = <String>{};
+  final ScrollController _scrollController = ScrollController();
+  final ValueNotifier<double> _scrollOffset = ValueNotifier<double>(0);
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_handleScroll);
+  }
+
+  void _handleScroll() {
+    if (!_scrollController.hasClients) return;
+    _scrollOffset.value = _scrollController.offset;
+  }
+
+  @override
+  void dispose() {
+    _scrollController
+      ..removeListener(_handleScroll)
+      ..dispose();
+    _scrollOffset.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -89,87 +112,113 @@ class _RestaurantScreenState extends ConsumerState<RestaurantScreen> {
     }
     final items = selected?.items ?? const <CatalogMenuItem>[];
     final topInset = MediaQuery.paddingOf(context).top;
+    final cardTop = RestaurantHero.height - RestaurantHero.metaOverlap;
+    final titleStart =
+        cardTop + AppSpacing.xl - topInset - RestaurantTopBar.contentHeight;
 
-    return RefreshIndicator(
-      color: AppColors.primaryContainer,
-      onRefresh: () => ref
-          .read(restaurantDetailProvider(widget.restaurantId).notifier)
-          .refresh(),
-      child: CustomScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        slivers: [
-          SliverToBoxAdapter(child: _header(context, l10n, detail)),
-          if (!restaurant.isOpen)
-            SliverToBoxAdapter(child: _closedNotice(l10n)),
-          if (categories.isNotEmpty)
-            SliverPersistentHeader(
-              pinned: true,
-              delegate: RestaurantTabsHeaderDelegate(
-                topInset: topInset,
-                child: RestaurantCategoryTabs(
-                  categories: categories,
-                  selectedId: selectedId,
-                  onSelected: (id) => setState(() => _categoryId = id),
-                  onOpenMenu: () => _openMenuSheet(
-                    context,
-                    detail,
-                    categories,
-                    selectedId,
+    return Stack(
+      children: [
+        RefreshIndicator(
+          color: AppColors.primaryContainer,
+          edgeOffset: topInset + RestaurantTopBar.contentHeight,
+          onRefresh: () => ref
+              .read(restaurantDetailProvider(widget.restaurantId).notifier)
+              .refresh(),
+          child: CustomScrollView(
+            controller: _scrollController,
+            physics: const AlwaysScrollableScrollPhysics(),
+            slivers: [
+              SliverToBoxAdapter(child: _header(context, l10n, detail)),
+              if (!restaurant.isOpen)
+                SliverToBoxAdapter(child: _closedNotice(l10n)),
+              if (categories.isNotEmpty)
+                SliverPersistentHeader(
+                  pinned: true,
+                  delegate: RestaurantTabsHeaderDelegate(
+                    topInset: topInset + RestaurantTopBar.contentHeight,
+                    child: RestaurantCategoryTabs(
+                      categories: categories,
+                      selectedId: selectedId,
+                      onSelected: (id) => setState(() => _categoryId = id),
+                      onOpenMenu: () => _openMenuSheet(
+                        context,
+                        detail,
+                        categories,
+                        selectedId,
+                      ),
+                    ),
                   ),
                 ),
+              SliverToBoxAdapter(
+                child: _sectionTitle(l10n, selected, items.length),
               ),
-            ),
-          SliverToBoxAdapter(
-            child: _sectionTitle(l10n, selected, items.length),
+              if (items.isEmpty)
+                SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: EmptyState(
+                    title: l10n.emptyState,
+                    icon: Icons.restaurant_menu,
+                  ),
+                )
+              else
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.lg,
+                    AppSpacing.md,
+                    AppSpacing.lg,
+                    AppSpacing.xxl,
+                  ),
+                  sliver: SliverList.separated(
+                    itemCount: items.length,
+                    separatorBuilder: (_, __) =>
+                        const SizedBox(height: AppSpacing.md),
+                    itemBuilder: (context, index) {
+                      final item = items[index];
+                      final lines = _linesFor(cart, restaurant.id, item.id);
+                      final quantity = lines.fold<int>(
+                        0,
+                        (sum, line) => sum + line.quantity,
+                      );
+                      return RestaurantMenuItemCard(
+                        item: item,
+                        l10n: l10n,
+                        quantity: quantity,
+                        busy: _busyItems.contains(item.id),
+                        enabled: restaurant.isOpen,
+                        onTap: () => openLoadedMeal(
+                          context,
+                          item,
+                          restaurantOpen: restaurant.isOpen,
+                        ),
+                        onIncrement: () =>
+                            _increment(context, l10n, restaurant, item),
+                        onDecrement: () => _decrement(context, l10n, lines),
+                      );
+                    },
+                  ),
+                ),
+              const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xxl)),
+            ],
           ),
-          if (items.isEmpty)
-            SliverFillRemaining(
-              hasScrollBody: false,
-              child: EmptyState(
-                title: l10n.emptyState,
-                icon: Icons.restaurant_menu,
-              ),
-            )
-          else
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.lg,
-                AppSpacing.md,
-                AppSpacing.lg,
-                AppSpacing.xxl,
-              ),
-              sliver: SliverList.separated(
-                itemCount: items.length,
-                separatorBuilder: (_, __) =>
-                    const SizedBox(height: AppSpacing.md),
-                itemBuilder: (context, index) {
-                  final item = items[index];
-                  final lines = _linesFor(cart, restaurant.id, item.id);
-                  final quantity = lines.fold<int>(
-                    0,
-                    (sum, line) => sum + line.quantity,
-                  );
-                  return RestaurantMenuItemCard(
-                    item: item,
-                    l10n: l10n,
-                    quantity: quantity,
-                    busy: _busyItems.contains(item.id),
-                    enabled: restaurant.isOpen,
-                    onTap: () => openLoadedMeal(
-                      context,
-                      item,
-                      restaurantOpen: restaurant.isOpen,
-                    ),
-                    onIncrement: () =>
-                        _increment(context, l10n, restaurant, item),
-                    onDecrement: () => _decrement(context, l10n, lines),
-                  );
-                },
-              ),
+        ),
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          child: RestaurantTopBar(
+            restaurantId: restaurant.id,
+            title: restaurant.name,
+            scrollOffset: _scrollOffset,
+            titleStart: titleStart,
+            topInset: topInset,
+            onBack: () => context.canPop() ? context.pop() : context.go('/'),
+            onShare: () => Share.share(
+              '${restaurant.name} — ${l10n.appName}',
+              subject: restaurant.name,
             ),
-          const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xxl)),
-        ],
-      ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -187,19 +236,12 @@ class _RestaurantScreenState extends ConsumerState<RestaurantScreen> {
           right: 0,
           height: RestaurantHero.height,
           child: RestaurantHero(
-            restaurantId: restaurant.id,
             imageUrl: restaurant.bannerUrl ?? restaurant.logoUrl,
-            onBack: () =>
-                context.canPop() ? context.pop() : context.go('/'),
-            onShare: () => Share.share(
-              '${restaurant.name} — ${l10n.appName}',
-              subject: restaurant.name,
-            ),
           ),
         ),
         Padding(
           padding: const EdgeInsetsDirectional.only(
-            top: RestaurantHero.height - 32,
+            top: RestaurantHero.height - RestaurantHero.metaOverlap,
             start: AppSpacing.lg,
             end: AppSpacing.lg,
           ),

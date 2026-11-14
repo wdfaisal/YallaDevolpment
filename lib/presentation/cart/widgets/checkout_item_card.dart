@@ -10,8 +10,8 @@ import '../../../core/widgets/quantity_stepper.dart';
 import '../../../data/models/cart.dart';
 import 'checkout_section_card.dart';
 
-/// One cart line: name, options, line total, quantity stepper and the real
-/// product image on the inline-end side.
+/// One cart line: name, description, options, unit/line price, quantity
+/// stepper and the real product image on the inline-end side.
 class CheckoutItemCard extends StatelessWidget {
   const CheckoutItemCard({
     super.key,
@@ -20,6 +20,7 @@ class CheckoutItemCard extends StatelessWidget {
     required this.l10n,
     required this.onQuantity,
     required this.onRemove,
+    this.description,
   });
 
   final CartLine line;
@@ -28,8 +29,17 @@ class CheckoutItemCard extends StatelessWidget {
   final ValueChanged<int> onQuantity;
   final VoidCallback onRemove;
 
+  /// Catalog description for this menu item, when the restaurant API sends one.
+  final String? description;
+
   @override
   Widget build(BuildContext context) {
+    final text = description?.trim() ?? '';
+    final hasDescription = text.isNotEmpty;
+    final unitPrice = Fmt.moneyExact(line.unitTotalMinor);
+    final linePrice = Fmt.moneyExact(line.lineTotalMinor);
+    final showUnitRow = line.quantity > 1 || linePrice != unitPrice;
+
     return CheckoutSectionCard(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -69,6 +79,18 @@ class CheckoutItemCard extends StatelessWidget {
                     ),
                   ],
                 ),
+                if (hasDescription)
+                  Padding(
+                    padding: const EdgeInsets.only(top: AppSpacing.xs),
+                    child: Text(
+                      text,
+                      style: AppTypography.bodySm.copyWith(
+                        color: AppColors.secondary,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
                 if (line.options.isNotEmpty)
                   Padding(
                     padding: const EdgeInsets.only(top: AppSpacing.xs),
@@ -103,30 +125,44 @@ class CheckoutItemCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                const SizedBox(height: AppSpacing.lg),
+                const SizedBox(height: AppSpacing.md),
                 Row(
                   children: [
                     Expanded(
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.baseline,
-                        textBaseline: TextBaseline.alphabetic,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Flexible(
-                            child: Text(
-                              Fmt.moneyExact(line.lineTotalMinor),
-                              style: AppTypography.headlineSm.copyWith(
-                                fontWeight: FontWeight.w700,
+                          if (showUnitRow)
+                            Text(
+                              '$unitPrice $currency × ${line.quantity}',
+                              style: AppTypography.bodySm.copyWith(
+                                color: AppColors.secondary,
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            currency,
-                            style: AppTypography.labelSm.copyWith(
-                              color: AppColors.secondary,
-                            ),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.baseline,
+                            textBaseline: TextBaseline.alphabetic,
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  linePrice,
+                                  style: AppTypography.headlineSm.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                currency,
+                                style: AppTypography.labelSm.copyWith(
+                                  color: AppColors.secondary,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),

@@ -33,9 +33,10 @@ class L10n {
   String get back => _t('رجوع', 'Back');
   String get seeAll => _t('عرض الكل', 'See all');
   String get loading => _t('جارٍ التحميل…', 'Loading…');
-  String get somethingWentWrong => _t('تعذّر إكمال العملية', 'Something went wrong');
-  String get connectionError =>
-      _t('تعذّر الاتصال بالخادم. تحقق من الشبكة.', 'Cannot reach the server. Check your connection.');
+  String get somethingWentWrong =>
+      _t('تعذّر إكمال العملية', 'Something went wrong');
+  String get connectionError => _t('تعذّر الاتصال بالخادم. تحقق من الشبكة.',
+      'Cannot reach the server. Check your connection.');
   String get emptyState => _t('لا توجد بيانات لعرضها', 'Nothing to show yet');
   String get offline => _t('غير متصل', 'Offline');
 
@@ -45,10 +46,12 @@ class L10n {
   String get services => _t('الخدمات', 'Services');
   String get food => _t('المطاعم', 'Restaurants');
   String get parcel => _t('طلبات مارت', 'Parcel');
-  String get exclusiveOffers => _t('عروض حصرية اليوم', 'Exclusive offers today');
+  String get exclusiveOffers =>
+      _t('عروض حصرية اليوم', 'Exclusive offers today');
   String get exclusiveOffer => _t('عرض حصري', 'Exclusive offer');
   String get orderNow => _t('اطلب الآن', 'Order now');
-  String get restaurantsNearYou => _t('مطاعم بالقرب منك', 'Restaurants near you');
+  String get restaurantsNearYou =>
+      _t('مطاعم بالقرب منك', 'Restaurants near you');
   String get bestSellersThisWeek =>
       _t('الأكثر طلباً هذا الأسبوع', 'Most ordered this week');
   String get nearby => _t('الأقرب إليك', 'Near you');
@@ -63,8 +66,7 @@ class L10n {
   String get newBadge => _t('جديد', 'New');
   String get serviceUnavailable =>
       _t('هذه الخدمة غير متاحة حالياً', 'This service is not available yet');
-  String get featuredDiscounts =>
-      _t('أبرز عروض الخصم', 'Top discounted items');
+  String get featuredDiscounts => _t('أبرز عروض الخصم', 'Top discounted items');
   String discountedItems(int count) =>
       _t('$count أصناف مخفضة', '$count discounted items');
   String get codeLabel => _t('كود', 'Code');
@@ -86,11 +88,12 @@ class L10n {
   String get hoursShort => _t('س', 'h');
   String get daysShort => _t('ي', 'd');
   String get categories => _t('التصنيفات', 'Categories');
-  String get noOffers => _t('لا توجد عروض متاحة الآن', 'No offers available right now');
-  String get noRestaurantsNearby =>
-      _t('لا توجد مطاعم قريبة من عنوانك الحالي', 'No restaurants near your current address');
-  String get addAddressToSeeNearby =>
-      _t('أضف عنواناً لعرض المطاعم القريبة', 'Add an address to see nearby restaurants');
+  String get noOffers =>
+      _t('لا توجد عروض متاحة الآن', 'No offers available right now');
+  String get noRestaurantsNearby => _t('لا توجد مطاعم قريبة من عنوانك الحالي',
+      'No restaurants near your current address');
+  String get addAddressToSeeNearby => _t('أضف عنواناً لعرض المطاعم القريبة',
+      'Add an address to see nearby restaurants');
 
   // Restaurant list & filters
   String get sortBy => _t('ترتيب حسب', 'Sort by');
@@ -137,9 +140,11 @@ class L10n {
   String get itemUnavailable => _t('غير متاح حالياً', 'Currently unavailable');
   String get outOfStock => _t('نفد', 'Sold out');
   String get favoriteAdded => _t('أُضيف إلى المفضلة', 'Added to favorites');
-  String get favoriteRemoved => _t('أُزيل من المفضلة', 'Removed from favorites');
-  String get restaurantClosedNotice =>
-      _t('المطعم مغلق حالياً ولا يمكن استقبال الطلبات.', 'The restaurant is closed and not accepting orders.');
+  String get favoriteRemoved =>
+      _t('أُزيل من المفضلة', 'Removed from favorites');
+  String get restaurantClosedNotice => _t(
+      'المطعم مغلق حالياً ولا يمكن استقبال الطلبات.',
+      'The restaurant is closed and not accepting orders.');
 
   // Restaurant details (Stitch redesign)
   String get menuSections => _t('قائمة الأقسام', 'Menu sections');
@@ -161,8 +166,7 @@ class L10n {
     return '$count أصناف';
   }
 
-  String ratingCountLabel(int count) =>
-      _t('+$count تقييم', '+$count reviews');
+  String ratingCountLabel(int count) => _t('+$count تقييم', '+$count reviews');
   String caloriesLabel(int kcal) => _t('$kcal سعرة', '$kcal kcal');
   String get includesVat => _t('(شامل الضريبة)', '(incl. VAT)');
 
@@ -182,26 +186,28 @@ class L10n {
   String get chooseOne => _t('اختر واحداً', 'Choose one');
   String get chooseUpTo => _t('اختر حتى', 'Choose up to');
   String get specialInstructions => _t('ملاحظات خاصة', 'Special instructions');
-  String get notesHint => _t('مثال: بدون بصل، صوص إضافي…', 'e.g. no onions, extra sauce…');
+  String get notesHint =>
+      _t('مثال: بدون بصل، صوص إضافي…', 'e.g. no onions, extra sauce…');
   String get quantity => _t('الكمية', 'Quantity');
   String get decreaseQuantity => _t('تقليل', 'Decrease quantity');
   String get increaseQuantity => _t('زيادة', 'Increase quantity');
   String get addFor => _t('إضافة', 'Add');
-  String get selectRequiredOptions =>
-      _t('أكمل الخيارات الإلزامية أولاً', 'Complete the required options first');
+  String get selectRequiredOptions => _t(
+      'أكمل الخيارات الإلزامية أولاً', 'Complete the required options first');
   String get addedToCart => _t('أُضيف إلى السلة', 'Added to cart');
 
   // Cart & checkout
   String get yourCart => _t('سلتك', 'Your cart');
   String get emptyCart => _t('سلتك فارغة', 'Your cart is empty');
-  String get emptyCartHint =>
-      _t('أضف أصنافاً من مطعمك المفضل لتبدأ الطلب.', 'Add items from your favourite restaurant to start.');
+  String get emptyCartHint => _t('أضف أصنافاً من مطعمك المفضل لتبدأ الطلب.',
+      'Add items from your favourite restaurant to start.');
   String get browseRestaurants => _t('تصفح المطاعم', 'Browse restaurants');
-  String get oneRestaurantOnly =>
-      _t('يمكن الطلب من مطعم واحد فقط. أفرغ السلة أولاً.', 'Only one restaurant per order. Clear the cart first.');
+  String get oneRestaurantOnly => _t(
+      'يمكن الطلب من مطعم واحد فقط. أفرغ السلة أولاً.',
+      'Only one restaurant per order. Clear the cart first.');
   String get clearCart => _t('إفراغ السلة', 'Clear cart');
-  String get clearCartConfirm =>
-      _t('سيُحذف كل ما في السلة. هل تريد المتابعة؟', 'All cart items will be removed. Continue?');
+  String get clearCartConfirm => _t('سيُحذف كل ما في السلة. هل تريد المتابعة؟',
+      'All cart items will be removed. Continue?');
   String get subtotal => _t('المجموع الفرعي', 'Subtotal');
   String get vat => _t('الضريبة', 'VAT');
   String get discount => _t('الخصم', 'Discount');
@@ -211,7 +217,8 @@ class L10n {
   String get couponApplied => _t('تم تطبيق الكوبون', 'Coupon applied');
   String get couponInvalid => _t('كود الخصم غير صالح', 'Invalid coupon code');
   String get removeCoupon => _t('إزالة', 'Remove');
-  String get minimumNotMet => _t('لم تصل للحد الأدنى للطلب', 'Minimum order not met');
+  String get minimumNotMet =>
+      _t('لم تصل للحد الأدنى للطلب', 'Minimum order not met');
   String get minimumRemaining => _t('أضف', 'Add');
   String get checkout => _t('إتمام الطلب', 'Checkout');
   String get delivery => _t('توصيل', 'Delivery');
@@ -230,12 +237,13 @@ class L10n {
   String get placeOrder => _t('تأكيد الطلب', 'Place order');
   String get placingOrder => _t('جارٍ إنشاء الطلب…', 'Placing order…');
   String get orderPlaced => _t('تم إنشاء طلبك', 'Order placed');
-  String get orderFailed => _t('تعذّر إنشاء الطلب', 'Could not place the order');
+  String get orderFailed =>
+      _t('تعذّر إنشاء الطلب', 'Could not place the order');
   String get trackOrder => _t('تتبع الطلب', 'Track order');
   String get continueShopping => _t('متابعة التسوق', 'Continue shopping');
   String get walletBalance => _t('رصيد المحفظة', 'Wallet balance');
-  String get insufficientWallet =>
-      _t('رصيد المحفظة غير كافٍ لهذا الجزء', 'Wallet balance is not enough for this part');
+  String get insufficientWallet => _t('رصيد المحفظة غير كافٍ لهذا الجزء',
+      'Wallet balance is not enough for this part');
   String get paymentUnavailable => _t('غير متاح', 'Unavailable');
   String get deliveryFeeFree => _t('مجاني', 'Free');
   String get orderSummary => _t('ملخص الطلب', 'Order summary');
@@ -261,8 +269,8 @@ class L10n {
         'We make sure your notes reach the driver and restaurant',
       );
   String get couponAppliedBadge => _t('مطبق', 'Applied');
-  String couponSaved(String amount) =>
-      _t('تم توفير $amount بنجاح على طلبك!', 'You saved $amount on this order!');
+  String couponSaved(String amount) => _t(
+      'تم توفير $amount بنجاح على طلبك!', 'You saved $amount on this order!');
   String get changeAddress => _t('تغيير العنوان', 'Change address');
   String get addDriverInstructions =>
       _t('إضافة تعليمات الوصول للسائق', 'Add driver instructions');
@@ -287,27 +295,31 @@ class L10n {
       _t('مكتمل $percent%', '$percent% complete');
   String get paymentWalletHint =>
       _t('خصم مباشر من رصيد محفظتك', 'Pay directly from your wallet balance');
-  String get paymentCashHint =>
-      _t('يرجى تحضير المبلغ المساوي قدر الإمكان', 'Please prepare the exact amount');
-  String get paymentCardHint => _t('بطاقة مدى أو ائتمانية', 'Mada or credit card');
-  String get paymentTransferHint =>
-      _t('حوّل المبلغ ثم أرفق رقم العملية', 'Transfer the amount then add the reference');
+  String get paymentCashHint => _t('يرجى تحضير المبلغ المساوي قدر الإمكان',
+      'Please prepare the exact amount');
+  String get paymentCardHint =>
+      _t('بطاقة مدى أو ائتمانية', 'Mada or credit card');
+  String get paymentTransferHint => _t('حوّل المبلغ ثم أرفق رقم العملية',
+      'Transfer the amount then add the reference');
 
   // Search
-  String get searchHint => _t('ابحث عن مطعم أو طبق…', 'Search restaurants or dishes…');
+  String get searchHint =>
+      _t('ابحث عن مطعم أو طبق…', 'Search restaurants or dishes…');
   String get recentSearches => _t('عمليات البحث الأخيرة', 'Recent searches');
   String get clearHistory => _t('مسح السجل', 'Clear history');
   String get suggestions => _t('اقتراحات', 'Suggestions');
   String get searchResults => _t('نتائج البحث', 'Search results');
   String get dishes => _t('الأطباق', 'Dishes');
   String get startTyping => _t('اكتب للبحث', 'Start typing to search');
-  String get minCharsHint => _t('أدخل حرفين على الأقل', 'Enter at least two characters');
+  String get minCharsHint =>
+      _t('أدخل حرفين على الأقل', 'Enter at least two characters');
 
   // Account
   String get guest => _t('زائر', 'Guest');
   String get signIn => _t('تسجيل الدخول', 'Sign in');
   String get signOut => _t('تسجيل الخروج', 'Sign out');
-  String get signOutConfirm => _t('هل تريد تسجيل الخروج؟', 'Sign out of your account?');
+  String get signOutConfirm =>
+      _t('هل تريد تسجيل الخروج؟', 'Sign out of your account?');
   String get editProfile => _t('تعديل الملف الشخصي', 'Edit profile');
   String get fullName => _t('الاسم الكامل', 'Full name');
   String get phone => _t('رقم الهاتف', 'Phone number');
@@ -345,16 +357,22 @@ class L10n {
       _t('إدارة عناوين التوصيل', 'Manage your delivery addresses');
   String get ordersSubtitle =>
       _t('تابع طلباتك السابقة والنشطة', 'Track active and past orders');
-  String get loyaltySubtitle => _t('اجمع النقاط مع كل طلب', 'Earn points with every order');
-  String get walletSubtitle => _t('رصيدك وحركات المحفظة', 'Your balance and transactions');
+  String get loyaltySubtitle =>
+      _t('اجمع النقاط مع كل طلب', 'Earn points with every order');
+  String get walletSubtitle =>
+      _t('رصيدك وحركات المحفظة', 'Your balance and transactions');
   String get preferences => _t('التفضيلات', 'Preferences');
-  String get notificationsSubtitle => _t('تنبيهات الطلبات والعروض', 'Order and offer alerts');
-  String get settingsSubtitle => _t('الخصوصية والإشعارات', 'Privacy and notifications');
+  String get notificationsSubtitle =>
+      _t('تنبيهات الطلبات والعروض', 'Order and offer alerts');
+  String get settingsSubtitle =>
+      _t('الخصوصية والإشعارات', 'Privacy and notifications');
   String get supportAndInfo => _t('الدعم والمعلومات', 'Support & info');
-  String get supportSubtitle => _t('تواصل معنا أو قدّم شكوى', 'Contact us or file a complaint');
-  String get shareAppSubtitle => _t('شارك التطبيق مع أصدقائك', 'Share the app with friends');
-  String get shareAppMessage =>
-      _t('اطلب من مطاعمك المفضلة عبر يلا طلبات.', 'Order from your favourite restaurants on Yalla Talabat.');
+  String get supportSubtitle =>
+      _t('تواصل معنا أو قدّم شكوى', 'Contact us or file a complaint');
+  String get shareAppSubtitle =>
+      _t('شارك التطبيق مع أصدقائك', 'Share the app with friends');
+  String get shareAppMessage => _t('اطلب من مطاعمك المفضلة عبر يلا طلبات.',
+      'Order from your favourite restaurants on Yalla Talabat.');
 
   // Profile screen (Stitch profile redesign)
   String get profileTitle => _t('حسابي والملف الشخصي', 'My account & profile');
@@ -368,23 +386,28 @@ class L10n {
   String get manageOrdersAndPayments =>
       _t('إدارة الطلبات والمدفوعات', 'Manage orders & payments');
   String get savedAddresses => _t('العناوين المحفوظة', 'Saved addresses');
-  String get paymentMethods => _t('طرق الدفع والبطاقات', 'Payment methods & cards');
-  String get paymentMethodsSubtitle => _t('الدفع عند الاستلام متاح', 'Cash on delivery available');
+  String get paymentMethods =>
+      _t('طرق الدفع والبطاقات', 'Payment methods & cards');
+  String get paymentMethodsSubtitle =>
+      _t('الدفع عند الاستلام متاح', 'Cash on delivery available');
   String get paymentMethodsInfo => _t(
         'الدفع عند الاستلام متاح حالياً. الدفع الإلكتروني غير متاح بعد.',
         'Cash on delivery is available now. Online card payments are not available yet.',
       );
-  String get orderHistory => _t('سجل الطلبات والفواتير', 'Order history & invoices');
+  String get orderHistory =>
+      _t('سجل الطلبات والفواتير', 'Order history & invoices');
   String get orderHistorySubtitle => _t(
         'تحميل الفواتير الضريبية وتكرار الطلبات',
         'Download tax invoices and reorder',
       );
-  String get loyaltyProgram => _t('برنامج الولاء والمكافآت', 'Loyalty & rewards');
+  String get loyaltyProgram =>
+      _t('برنامج الولاء والمكافآت', 'Loyalty & rewards');
   String get loyaltyProgramSubtitle =>
       _t('عروض حصرية ومستويات الخصم', 'Exclusive offers and discount tiers');
   String get preferencesAndSettings =>
       _t('التفضيلات والإعدادات', 'Preferences & settings');
-  String get notificationSettings => _t('الإشعارات والتنبيهات', 'Notifications & alerts');
+  String get notificationSettings =>
+      _t('الإشعارات والتنبيهات', 'Notifications & alerts');
   String get notificationSettingsSubtitle => _t(
         'تحديثات فورية لحالة الطلب والعروض',
         'Instant order status and offer updates',
@@ -393,15 +416,19 @@ class L10n {
       _t('تفضيلات اللغة والمظهر', 'Language & appearance');
   String get languageAndAppearanceSubtitle =>
       _t('العربية • مظهر النهار الفاتح', 'English • Light theme');
-  String get helpAndSupport => _t('المساعدة وخدمة العملاء', 'Help & customer service');
+  String get helpAndSupport =>
+      _t('المساعدة وخدمة العملاء', 'Help & customer service');
   String get availableNow => _t('متاح الآن', 'Available now');
-  String get termsAndPrivacy => _t('الشروط وسياسة الخصوصية', 'Terms & privacy policy');
+  String get termsAndPrivacy =>
+      _t('الشروط وسياسة الخصوصية', 'Terms & privacy policy');
   String get termsAndPrivacySubtitle => _t(
         'حقوق المستخدم والاتفاقيات الرسمية',
         'User rights and official agreements',
       );
-  String get notificationsEnabledToast => _t('تم تفعيل التنبيهات', 'Notifications enabled');
-  String get notificationsDisabledToast => _t('تم إيقاف التنبيهات', 'Notifications disabled');
+  String get notificationsEnabledToast =>
+      _t('تم تفعيل التنبيهات', 'Notifications enabled');
+  String get notificationsDisabledToast =>
+      _t('تم إيقاف التنبيهات', 'Notifications disabled');
   String get changePhoto => _t('تغيير الصورة الشخصية', 'Change profile photo');
   String get lightTheme => _t('مظهر النهار الفاتح', 'Light theme');
   String savedAddressesSubtitle(int count) => _t(
@@ -415,21 +442,25 @@ class L10n {
 
   // Auth
   String get loginTitle => _t('تسجيل الدخول', 'Sign in');
-  String get loginSubtitle =>
-      _t('أدخل رقم هاتفك لاستلام رمز التحقق', 'Enter your phone number to receive a verification code');
+  String get loginSubtitle => _t('أدخل رقم هاتفك لاستلام رمز التحقق',
+      'Enter your phone number to receive a verification code');
   String get phoneHint => _t('9xxxxxxxx', '9xxxxxxxx');
   String get sendCode => _t('إرسال الرمز', 'Send code');
   String get otpTitle => _t('رمز التحقق', 'Verification code');
-  String get otpSubtitle => _t('أدخل الرمز المرسل إلى', 'Enter the code sent to');
+  String get otpSubtitle =>
+      _t('أدخل الرمز المرسل إلى', 'Enter the code sent to');
   String get verify => _t('تحقق', 'Verify');
   String get resend => _t('إعادة الإرسال', 'Resend');
   String get resendIn => _t('إعادة الإرسال بعد', 'Resend in');
   String get changePhone => _t('تغيير الرقم', 'Change number');
   String get devCode => _t('رمز التطوير', 'Development code');
-  String get nameHint => _t('الاسم (اختياري للتسجيل)', 'Name (optional for sign up)');
+  String get nameHint =>
+      _t('الاسم (اختياري للتسجيل)', 'Name (optional for sign up)');
   String get invalidPhone => _t('رقم الهاتف غير صالح', 'Invalid phone number');
-  String get invalidCode => _t('رمز التحقق غير صالح', 'Invalid verification code');
-  String get sessionExpired => _t('انتهت الجلسة. سجّل الدخول مجدداً.', 'Session expired. Please sign in again.');
+  String get invalidCode =>
+      _t('رمز التحقق غير صالح', 'Invalid verification code');
+  String get sessionExpired => _t('انتهت الجلسة. سجّل الدخول مجدداً.',
+      'Session expired. Please sign in again.');
 
   // Orders
   String get activeOrders => _t('الطلبات النشطة', 'Active orders');
@@ -438,7 +469,8 @@ class L10n {
   String get noActiveOrders => _t('لا توجد طلبات نشطة', 'No active orders');
   String get orderDetails => _t('تفاصيل الطلب', 'Order details');
   String get cancelOrder => _t('إلغاء الطلب', 'Cancel order');
-  String get cancelReason => _t('سبب الإلغاء (اختياري)', 'Cancellation reason (optional)');
+  String get cancelReason =>
+      _t('سبب الإلغاء (اختياري)', 'Cancellation reason (optional)');
   String get reorder => _t('إعادة الطلب', 'Reorder');
   String get rateOrder => _t('قيّم الطلب', 'Rate order');
   String get track => _t('تتبع', 'Track');
@@ -455,16 +487,15 @@ class L10n {
   String get yourComment => _t('تعليقك (اختياري)', 'Your comment (optional)');
   String get submitRating => _t('إرسال التقييم', 'Submit rating');
   String get ratingSubmitted => _t('تم إرسال تقييمك', 'Rating submitted');
-  String get ratingWindowClosed => _t('انتهت فترة التقييم', 'Rating window has closed');
+  String get ratingWindowClosed =>
+      _t('انتهت فترة التقييم', 'Rating window has closed');
 
   // Notifications
   String get markAllRead => _t('تعليم الكل كمقروء', 'Mark all as read');
   String get noNotifications => _t('لا توجد إشعارات', 'No notifications');
-  String get markAllReadAction =>
-      _t('تحديد الكل كمقروء', 'Mark all as read');
+  String get markAllReadAction => _t('تحديد الكل كمقروء', 'Mark all as read');
   String get notificationsAllFilter => _t('الكل', 'All');
-  String get notificationsOrdersFilter =>
-      _t('حالة الطلبات', 'Order status');
+  String get notificationsOrdersFilter => _t('حالة الطلبات', 'Order status');
   String get notificationsOffersFilter =>
       _t('العروض والخصومات', 'Offers & discounts');
   String get notificationsAccountFilter =>
@@ -510,8 +541,7 @@ class L10n {
         'لديك $count إشعارات غير مقروءة',
         'You have $count unread notifications',
       );
-  String newNotificationsCount(int count) =>
-      _t('$count جديد', '$count new');
+  String newNotificationsCount(int count) => _t('$count جديد', '$count new');
   String notificationCount(int count) {
     if (isArabic) {
       if (count == 1) return 'إشعار واحد';
@@ -525,7 +555,8 @@ class L10n {
   // Wallet / loyalty
   String get availableBalance => _t('الرصيد المتاح', 'Available balance');
   String get heldBalance => _t('المحتجز', 'Held');
-  String get noWalletEntries => _t('لا توجد حركات على المحفظة', 'No wallet transactions');
+  String get noWalletEntries =>
+      _t('لا توجد حركات على المحفظة', 'No wallet transactions');
   String get noLoyaltyEntries => _t('لا توجد حركات نقاط', 'No points activity');
   String get topUpUnavailable =>
       _t('شحن المحفظة غير متاح حالياً', 'Wallet top-up is not available yet');
@@ -544,9 +575,10 @@ class L10n {
 
   // Favorites
   String get noFavorites => _t('لا توجد مفضلات بعد', 'No favorites yet');
-  String get noFavoriteRestaurants =>
-      _t('أضف مطاعم إلى المفضلة لتجدها هنا.', 'Save restaurants to find them here.');
-  String get noFavoriteItems => _t('أضف أطباقاً إلى المفضلة لتجدها هنا.', 'Save dishes to find them here.');
+  String get noFavoriteRestaurants => _t('أضف مطاعم إلى المفضلة لتجدها هنا.',
+      'Save restaurants to find them here.');
+  String get noFavoriteItems => _t(
+      'أضف أطباقاً إلى المفضلة لتجدها هنا.', 'Save dishes to find them here.');
 
   // Sharing
   String get share => _t('مشاركة', 'Share');
@@ -573,8 +605,10 @@ class L10n {
   String get enterCodeHint =>
       _t('أدخل الرمز المكوّن من 6 أرقام', 'Enter the 6-digit code');
   String get otpExpiresIn => _t('ينتهي الرمز خلال', 'Code expires in');
-  String get codeExpired => _t('انتهت صلاحية الرمز. أعد الإرسال.', 'The code expired. Send a new one.');
-  String get signInToContinue => _t('سجّل الدخول للمتابعة', 'Sign in to continue');
+  String get codeExpired => _t(
+      'انتهت صلاحية الرمز. أعد الإرسال.', 'The code expired. Send a new one.');
+  String get signInToContinue =>
+      _t('سجّل الدخول للمتابعة', 'Sign in to continue');
 
   // Order extras
   String get orderStatus => _t('حالة الطلب', 'Order status');
@@ -600,9 +634,10 @@ class L10n {
   String get fulfillment => _t('طريقة الاستلام', 'Fulfillment');
   String get notes => _t('ملاحظات', 'Notes');
   String get paymentBreakdown => _t('تفاصيل الدفع', 'Payment details');
-  String get reorderUnavailable =>
-      _t('افتح قائمة المطعم وأضف الأصناف من جديد', 'Open the restaurant menu to add the items again');
-  String get callUnavailable => _t('لا يوجد رقم هاتف متاح', 'No phone number available');
+  String get reorderUnavailable => _t('افتح قائمة المطعم وأضف الأصناف من جديد',
+      'Open the restaurant menu to add the items again');
+  String get callUnavailable =>
+      _t('لا يوجد رقم هاتف متاح', 'No phone number available');
   String get orderShareText => _t('تفاصيل طلبي من', 'My order from');
   String get helpWithOrder =>
       _t('تحتاج مساعدة بهذا الطلب؟', 'Need help with this order?');
@@ -611,26 +646,82 @@ class L10n {
   // Address extras
   String get addNewAddress => _t('إضافة عنوان جديد', 'Add a new address');
   String get editAddress => _t('تعديل العنوان', 'Edit address');
-  String get deleteAddressConfirm =>
-      _t('سيُحذف هذا العنوان نهائياً.', 'This address will be permanently deleted.');
+  String get deleteAddressConfirm => _t('سيُحذف هذا العنوان نهائياً.',
+      'This address will be permanently deleted.');
   String get addressSaved => _t('تم حفظ العنوان', 'Address saved');
   String get addressDeleted => _t('تم حذف العنوان', 'Address deleted');
   String get labelHint => _t('مثال: المنزل، العمل', 'e.g. Home, Work');
   String get addressDetailsHint =>
       _t('الشارع، المبنى، الطابق', 'Street, building, floor');
-  String get instructionsHint => _t('مثال: اتصل عند الوصول', 'e.g. call on arrival');
-  String get locationOptional =>
-      _t('الموقع اختياري لكنه يحسّن دقة التوصيل', 'Location is optional but improves delivery accuracy');
+  String get instructionsHint =>
+      _t('مثال: اتصل عند الوصول', 'e.g. call on arrival');
+  String get locationOptional => _t('الموقع اختياري لكنه يحسّن دقة التوصيل',
+      'Location is optional but improves delivery accuracy');
   String get coverage => _t('نطاق التغطية', 'Coverage');
-  String get checkingCoverage => _t('جارٍ التحقق من التغطية…', 'Checking coverage…');
+  String get checkingCoverage =>
+      _t('جارٍ التحقق من التغطية…', 'Checking coverage…');
   String get zone => _t('المنطقة', 'Zone');
   String get invalidCoordinates =>
       _t('أدخل خط عرض وخط طول صحيحين', 'Enter valid latitude and longitude');
 
+  // Address form (Stitch redesign)
+  String get addressType => _t('نوع العنوان', 'Address type');
+  String get addressTypeHint =>
+      _t('اختر تصنيفاً للتعرف عليه لاحقاً', 'Pick a label to find it later');
+  String get addressTypeHome => _t('منزل', 'Home');
+  String get addressTypeWork => _t('عمل / مكتب', 'Work / office');
+  String get addressTypeChalet => _t('استراحة', 'Chalet');
+  String get addressTypeOther => _t('أخرى', 'Other');
+  String get locationDetails =>
+      _t('بيانات الموقع الدقيقة', 'Exact location details');
+  String get cityDistrict => _t('المدينة والحي', 'City & district');
+  String get cityDistrictHint =>
+      _t('مثال: الرياض - حي النرجس', 'e.g. Riyadh - Al Narjis');
+  String get streetName =>
+      _t('اسم الشارع الرئيسي والفرعي', 'Main and side street');
+  String get streetNameHint =>
+      _t('مثال: شارع أنس بن مالك', 'e.g. Anas Ibn Malik Rd');
+  String get buildingNumber => _t('رقم المبنى / الفيلا', 'Building / villa');
+  String get floorApartment => _t('الدور / الشقة', 'Floor / apartment');
+  String get nearbyLandmark =>
+      _t('معلم بارز قريب لتسهيل الوصول', 'Nearby landmark');
+  String get nearbyLandmarkHint =>
+      _t('مثال: بجوار صيدلية الدواء', 'e.g. next to the pharmacy');
+  String get deliveryFacilities => _t(
+        'مرافق التوصيل وملاحظات الكابتن',
+        'Delivery facilities & captain notes',
+      );
+  String get fasterArrival => _t('تسريع الوصول', 'Faster arrival');
+  String get facilityElevator => _t('مصعد متوفر', 'Elevator available');
+  String get facilityParking => _t('موقف سيارات متاح', 'Parking available');
+  String get facilityGated => _t('مجمع مغلق / رمز دخول', 'Gated / entry code');
+  String get captainInstructions => _t(
+        'تعليمات خاصة للكابتن عند الوصول',
+        'Special instructions for the captain',
+      );
+  String get captainInstructionsHint => _t(
+        'اكتب أي ملاحظة لتفادي الاتصال أو إزعاج المنزل…',
+        'Any note to avoid calling or disturbing the home…',
+      );
+  String get defaultAddressTitle =>
+      _t('تعيين كعنوان افتراضي للطلبات', 'Set as the default address');
+  String get defaultAddressHint => _t(
+        'سيتم اختياره تلقائياً عند طلب وجبتك القادمة',
+        'Chosen automatically on your next order',
+      );
+  String get addressDetailsRequired =>
+      _t('أدخل اسم الشارع أو الحي', 'Enter the street or district');
+  String get coordinates => _t('إحداثيات الموقع', 'Location coordinates');
+  String get enterCoordinates => _t('إدخال الإحداثيات', 'Enter coordinates');
+  String get resetPin => _t('إعادة ضبط الدبوس', 'Reset pin');
+  String get saveCoordinates => _t('حفظ الموقع', 'Save location');
+  String get clearLocation => _t('إزالة الموقع', 'Clear location');
+  String get pinSet => _t('محدد', 'Set');
+
   // Wallet extras
   String get walletHistory => _t('حركات المحفظة', 'Wallet activity');
-  String get walletInfo =>
-      _t('يمكنك استخدام الرصيد للدفع عند إتمام الطلب.', 'You can use this balance to pay at checkout.');
+  String get walletInfo => _t('يمكنك استخدام الرصيد للدفع عند إتمام الطلب.',
+      'You can use this balance to pay at checkout.');
   String get orderPayment => _t('دفع طلب', 'Order payment');
   String get orderRefund => _t('استرداد طلب', 'Order refund');
   String get walletAdjustment => _t('تسوية', 'Adjustment');
@@ -638,8 +729,8 @@ class L10n {
   String get walletWithdrawal => _t('سحب من المحفظة', 'Wallet withdrawal');
 
   // Loyalty extras
-  String get loyaltyInfo =>
-      _t('تُضاف النقاط بعد إتمام الطلبات.', 'Points are added after completed orders.');
+  String get loyaltyInfo => _t('تُضاف النقاط بعد إتمام الطلبات.',
+      'Points are added after completed orders.');
   String get loyaltyHistory => _t('حركات النقاط', 'Points activity');
   String get pointsEarned => _t('نقاط مكتسبة', 'Points earned');
   String get pointsRedeemed => _t('نقاط مستخدمة', 'Points used');
@@ -666,9 +757,10 @@ class L10n {
   String get categoryAccount => _t('الحساب', 'Account');
   String get relatedOrder => _t('الطلب المرتبط', 'Related order');
   String get replySent => _t('أُرسل الرد', 'Reply sent');
-  String get ticketClosedNotice => _t('هذه التذكرة مغلقة.', 'This ticket is closed.');
-  String get supportIntro =>
-      _t('أرسل تذكرة وسيتواصل معك فريق الدعم.', 'Send a ticket and our support team will follow up.');
+  String get ticketClosedNotice =>
+      _t('هذه التذكرة مغلقة.', 'This ticket is closed.');
+  String get supportIntro => _t('أرسل تذكرة وسيتواصل معك فريق الدعم.',
+      'Send a ticket and our support team will follow up.');
   String get subjectHint => _t('مثال: الطلب متأخر', 'e.g. the order is late');
   String get descriptionHint =>
       _t('اشرح المشكلة بالتفصيل…', 'Describe the issue in detail…');
@@ -678,18 +770,19 @@ class L10n {
   String get profileUpdated => _t('تم تحديث الملف الشخصي', 'Profile updated');
   String get nameRequired => _t('الاسم مطلوب', 'Name is required');
   String get emailHint => _t('example@email.com', 'example@email.com');
-  String get phoneReadOnly =>
-      _t('لا يمكن تغيير رقم الهاتف من هنا', 'Phone number cannot be changed here');
+  String get phoneReadOnly => _t(
+      'لا يمكن تغيير رقم الهاتف من هنا', 'Phone number cannot be changed here');
   String get appLanguage => _t('لغة التطبيق', 'App language');
   String get privacy => _t('الخصوصية', 'Privacy');
-  String get privacyNotice =>
-      _t('تُحفظ جلستك بشكل آمن على هذا الجهاز.', 'Your session is stored securely on this device.');
+  String get privacyNotice => _t('تُحفظ جلستك بشكل آمن على هذا الجهاز.',
+      'Your session is stored securely on this device.');
   String get appVersion => _t('إصدار التطبيق', 'App version');
   String get accountStatus => _t('حالة الحساب', 'Account status');
   String get statusActive => _t('نشط', 'Active');
   String get statusSuspended => _t('موقوف', 'Suspended');
-  String get notificationsManagedBySystem =>
-      _t('تُدار إشعارات النظام من إعدادات الجهاز.', 'System notifications are managed in device settings.');
+  String get notificationsManagedBySystem => _t(
+      'تُدار إشعارات النظام من إعدادات الجهاز.',
+      'System notifications are managed in device settings.');
 
   // Favorites extras
   String get favoriteRestaurant => _t('مطعم', 'Restaurant');
@@ -699,6 +792,6 @@ class L10n {
   String get requiredField => _t('هذا الحقل مطلوب', 'This field is required');
   String get invalidValue => _t('قيمة غير صالحة', 'Invalid value');
   String get notAuthorized => _t('سجّل الدخول للمتابعة', 'Sign in to continue');
-  String get accountSuspended =>
-      _t('الحساب موقوف. تواصل مع الدعم.', 'Account suspended. Contact support.');
+  String get accountSuspended => _t(
+      'الحساب موقوف. تواصل مع الدعم.', 'Account suspended. Contact support.');
 }

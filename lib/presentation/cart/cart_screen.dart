@@ -378,6 +378,13 @@ class _CartScreenState extends ConsumerState<CartScreen> {
     if (restaurantId != null) {
       openMenu = () => context.push('/restaurants/$restaurantId');
     }
+    // Menu descriptions are not part of the cart payload, so they are joined
+    // from the live restaurant detail by menu item id.
+    final descriptions = <String, String>{
+      for (final category in detail?.menu ?? const <CatalogMenuCategory>[])
+        for (final item in category.items)
+          if (item.description.trim().isNotEmpty) item.id: item.description.trim(),
+    };
 
     return ListView(
       padding: const EdgeInsets.only(bottom: AppSpacing.xxl),
@@ -401,7 +408,6 @@ class _CartScreenState extends ConsumerState<CartScreen> {
             cart: cart,
             detail: detail,
             l10n: l10n,
-            onMenuTap: openMenu,
           ),
           top: AppSpacing.lg,
         ),
@@ -410,21 +416,11 @@ class _CartScreenState extends ConsumerState<CartScreen> {
             cart: cart,
             currency: currency,
             l10n: l10n,
+            descriptions: descriptions,
             onQuantity: (line, quantity) =>
                 _changeQuantity(context, l10n, line, quantity),
             onRemove: (line) => _removeLine(context, l10n, line),
             onEdit: openMenu,
-          ),
-          top: AppSpacing.lg,
-        ),
-        _section(
-          CheckoutFulfillmentCard(
-            fulfillment: _fulfillment,
-            l10n: l10n,
-            onChanged: (value) {
-              setState(() => _fulfillment = value);
-              _refreshQuote();
-            },
           ),
           top: AppSpacing.lg,
         ),
@@ -453,6 +449,17 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                 : () => context.push(
                       '/account/addresses/${selectedAddress.id}/edit',
                     ),
+          ),
+          top: AppSpacing.lg,
+        ),
+        _section(
+          CheckoutFulfillmentCard(
+            fulfillment: _fulfillment,
+            l10n: l10n,
+            onChanged: (value) {
+              setState(() => _fulfillment = value);
+              _refreshQuote();
+            },
           ),
           top: AppSpacing.lg,
         ),

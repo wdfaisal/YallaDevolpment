@@ -34,7 +34,11 @@ class CheckoutCouponCard extends StatelessWidget {
     final couponError = quote?.couponError;
     final border = OutlineInputBorder(
       borderRadius: BorderRadius.circular(AppSpacing.radius),
-      borderSide: BorderSide.none,
+      borderSide: const BorderSide(color: AppColors.borderSubtle),
+    );
+    final focusedBorder = OutlineInputBorder(
+      borderRadius: BorderRadius.circular(AppSpacing.radius),
+      borderSide: BorderSide(color: AppColors.primary.withValues(alpha: 0.4)),
     );
 
     return CheckoutSectionCard(
@@ -69,7 +73,7 @@ class CheckoutCouponCard extends StatelessWidget {
                         color: AppColors.secondary,
                       ),
                       filled: true,
-                      fillColor: AppColors.surfaceContainerLow,
+                      fillColor: AppColors.surfaceContainerLowest,
                       isDense: true,
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: AppSpacing.sm,
@@ -77,19 +81,24 @@ class CheckoutCouponCard extends StatelessWidget {
                       ),
                       border: border,
                       enabledBorder: border,
-                      focusedBorder: border,
+                      focusedBorder: focusedBorder,
                     ),
                   ),
                 ),
                 const SizedBox(width: AppSpacing.sm),
                 SizedBox(
                   height: 44,
-                  child: FilledButton(
+                  child: OutlinedButton(
                     onPressed: quoting ? null : onApply,
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.primaryContainer,
-                      foregroundColor: AppColors.onPrimary,
-                      elevation: 0,
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.primary,
+                      backgroundColor: AppColors.surfaceContainerLowest,
+                      side: BorderSide(
+                        color: AppColors.primary.withValues(alpha: 0.4),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.lg,
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(AppSpacing.radius),
                       ),

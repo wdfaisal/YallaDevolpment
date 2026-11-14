@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/design/app_colors.dart';
 import '../../../core/design/app_spacing.dart';
+import '../../../core/design/app_typography.dart';
 import '../../../core/localization/l10n.dart';
-import '../../shared/sheets.dart';
 import 'checkout_section_card.dart';
 
-/// Delivery / pickup switch. This is a real checkout capability kept from the
-/// previous screen; it stays inside a flat white card to match the design.
+/// Delivery / pickup selector. Rendered as a single flat dropdown so it shares
+/// the same field language as the rest of the checkout inputs.
 class CheckoutFulfillmentCard extends StatelessWidget {
   const CheckoutFulfillmentCard({
     super.key,
@@ -30,33 +31,76 @@ class CheckoutFulfillmentCard extends StatelessWidget {
             title: l10n.deliveryInfo,
           ),
           const SizedBox(height: AppSpacing.sm),
-          Row(
-            children: [
-              Expanded(
-                child: AppChoiceChip(
-                  label: l10n.delivery,
-                  selected: fulfillment == 'delivery',
-                  icon: Icons.delivery_dining,
-                  onTap: () {
-                    if (fulfillment != 'delivery') onChanged('delivery');
-                  },
+          Container(
+            padding: const EdgeInsetsDirectional.only(
+              start: AppSpacing.md,
+              end: AppSpacing.sm,
+            ),
+            decoration: BoxDecoration(
+              color: AppColors.surfaceContainerLowest,
+              borderRadius: BorderRadius.circular(AppSpacing.radius),
+              border: Border.all(color: AppColors.borderSubtle),
+            ),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                value: fulfillment,
+                isExpanded: true,
+                borderRadius: BorderRadius.circular(AppSpacing.radius),
+                dropdownColor: AppColors.surfaceContainerLowest,
+                icon: const Icon(
+                  Icons.keyboard_arrow_down,
+                  size: 20,
+                  color: AppColors.secondary,
                 ),
+                items: [
+                  DropdownMenuItem(
+                    value: 'delivery',
+                    child: _OptionRow(
+                      icon: Icons.delivery_dining,
+                      label: l10n.delivery,
+                    ),
+                  ),
+                  DropdownMenuItem(
+                    value: 'pickup',
+                    child: _OptionRow(
+                      icon: Icons.storefront_outlined,
+                      label: l10n.pickup,
+                    ),
+                  ),
+                ],
+                onChanged: (value) {
+                  if (value != null && value != fulfillment) onChanged(value);
+                },
               ),
-              const SizedBox(width: AppSpacing.sm),
-              Expanded(
-                child: AppChoiceChip(
-                  label: l10n.pickup,
-                  selected: fulfillment == 'pickup',
-                  icon: Icons.storefront_outlined,
-                  onTap: () {
-                    if (fulfillment != 'pickup') onChanged('pickup');
-                  },
-                ),
-              ),
-            ],
+            ),
           ),
         ],
       ),
+    );
+  }
+}
+
+class _OptionRow extends StatelessWidget {
+  const _OptionRow({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, size: 18, color: AppColors.primary),
+        const SizedBox(width: AppSpacing.sm),
+        Flexible(
+          child: Text(
+            label,
+            style: AppTypography.bodyMd.copyWith(color: AppColors.onSurface),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
     );
   }
 }
