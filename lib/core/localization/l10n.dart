@@ -241,6 +241,58 @@ class L10n {
   String get orderSummary => _t('ملخص الطلب', 'Order summary');
   String get items => _t('الأصناف', 'Items');
 
+  // Cart & checkout (Stitch redesign)
+  String get checkoutTitle =>
+      _t('إتمام الدفع / سلة الطلبات', 'Checkout / Your cart');
+  String get orderFrom => _t('طلبك من', 'Ordering from');
+  String get openForOrders => _t('مفتوح للطلبات', 'Open for orders');
+  String get editOrder => _t('تعديل الطلب', 'Edit order');
+  String requestedItems(int count) =>
+      _t('الأصناف المطلوبة ($count)', 'Items ($count)');
+  String get addMoreFromRestaurant =>
+      _t('أضف أصناف أخرى من هذا المطعم', 'Add more items from this restaurant');
+  String get deleteItem => _t('حذف الصنف', 'Remove item');
+  String get orderNotesHint => _t(
+        'ملاحظات إضافية للمطعم أو السائق (مثال: يرجى رن الجرس بهدوء أو ترك الطلب عند الباب)…',
+        'Extra notes for the restaurant or driver (e.g. ring the bell quietly)…',
+      );
+  String get notesDeliveryHint => _t(
+        'سنحرص على إيصال التنبيهات بدقة للكابتن والمطعم',
+        'We make sure your notes reach the driver and restaurant',
+      );
+  String get couponAppliedBadge => _t('مطبق', 'Applied');
+  String couponSaved(String amount) =>
+      _t('تم توفير $amount بنجاح على طلبك!', 'You saved $amount on this order!');
+  String get changeAddress => _t('تغيير العنوان', 'Change address');
+  String get addDriverInstructions =>
+      _t('إضافة تعليمات الوصول للسائق', 'Add driver instructions');
+  String get secureOnlinePayment =>
+      _t('دفع إلكتروني آمن', 'Secure online payment');
+  String get priceDetails => _t('تفاصيل الحساب', 'Price details');
+  String get finalTotal => _t('الإجمالي النهائي', 'Final total');
+  String get finalTotalHint =>
+      _t('شامل الضريبة وكافة الرسوم', 'Includes VAT and all fees');
+  String get orderGuarantee => _t(
+        'ضمان يلا طلبات: استرجاع فوري في حال لم يطابق الطلب المواصفات',
+        'Yalla Talabat guarantee: instant refund if the order does not match',
+      );
+  String get confirmAndPay => _t('تأكيد ودفع الطلب', 'Confirm & pay');
+  String freeDeliverySaved(String amount) => _t(
+        'وفرت $amount على رسوم التوصيل!',
+        'You saved $amount on delivery!',
+      );
+  String get freeDeliveryApplied =>
+      _t('تم تطبيق التوصيل المجاني', 'Free delivery applied');
+  String completedPercent(int percent) =>
+      _t('مكتمل $percent%', '$percent% complete');
+  String get paymentWalletHint =>
+      _t('خصم مباشر من رصيد محفظتك', 'Pay directly from your wallet balance');
+  String get paymentCashHint =>
+      _t('يرجى تحضير المبلغ المساوي قدر الإمكان', 'Please prepare the exact amount');
+  String get paymentCardHint => _t('بطاقة مدى أو ائتمانية', 'Mada or credit card');
+  String get paymentTransferHint =>
+      _t('حوّل المبلغ ثم أرفق رقم العملية', 'Transfer the amount then add the reference');
+
   // Search
   String get searchHint => _t('ابحث عن مطعم أو طبق…', 'Search restaurants or dishes…');
   String get recentSearches => _t('عمليات البحث الأخيرة', 'Recent searches');

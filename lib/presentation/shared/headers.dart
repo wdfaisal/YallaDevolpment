@@ -11,7 +11,7 @@ import '../../state/cart_controller.dart';
 import '../../state/session_controller.dart';
 import 'sheets.dart';
 
-/// Standard 56px page header. Owns no safe-area padding: [AppScaffold] already
+/// Standard 64px page header. Owns no safe-area padding: [AppScaffold] already
 /// wraps the header in a top [SafeArea].
 class SimpleHeader extends StatelessWidget {
   const SimpleHeader({
@@ -32,23 +32,25 @@ class SimpleHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 56,
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+      height: 64,
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       decoration: const BoxDecoration(
         color: AppColors.surfaceContainerLowest,
-        border: Border(bottom: BorderSide(color: AppColors.surfaceContainerLow)),
+        border: Border(bottom: BorderSide(color: AppColors.borderSubtle)),
       ),
       child: Row(
         children: [
           if (showBack)
             _CircleButton(
-              icon: Icons.arrow_forward,
+              // `arrow_back` carries matchTextDirection, so in RTL it renders
+              // pointing right — the correct "back" affordance for this app.
+              icon: Icons.arrow_back,
               tooltip: L10n.of(context).back,
               onTap: onBack ?? () => Navigator.of(context).maybePop(),
             )
           else
-            const SizedBox(width: AppSpacing.sm),
-          const SizedBox(width: AppSpacing.xs),
+            const SizedBox(width: AppSpacing.minTapTarget),
+          const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -90,12 +92,12 @@ class _CircleButton extends StatelessWidget {
     return Tooltip(
       message: tooltip ?? '',
       child: InkWell(
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BorderRadius.circular(AppSpacing.minTapTarget / 2),
         onTap: onTap,
         child: SizedBox(
-          width: 44,
-          height: 44,
-          child: Icon(icon, size: 22, color: AppColors.onSurface),
+          width: AppSpacing.minTapTarget,
+          height: AppSpacing.minTapTarget,
+          child: Icon(icon, size: 24, color: AppColors.onSurface),
         ),
       ),
     );
