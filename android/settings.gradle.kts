@@ -19,12 +19,11 @@ pluginManagement {
 
 plugins {
     id("dev.flutter.flutter-plugin-loader") version "1.0.0"
-    // Keep these three versions in the exact combination that the installed
-    // Flutter SDK ships in its own Android template. A newer AGP (9.2.x) fails
-    // to resolve from Google Maven on CI even though the artifact is published,
-    // and an untested AGP/Gradle pair is not worth the risk for a build that
-    // only has to produce a testable APK.
-    id("com.android.application") version "9.1.0" apply false
+    // Codemagic runs a newer Flutter than the local SDK and refuses to build
+    // below AGP 9.1.1 / Gradle 9.5.0. These are the lowest versions that satisfy
+    // that check and are published on Google Maven; AGP 9.2.1 failed to resolve
+    // its plugin marker on CI, so stay on the 9.1.x line.
+    id("com.android.application") version "9.1.1" apply false
     id("org.jetbrains.kotlin.android") version "2.4.0" apply false
 }
 

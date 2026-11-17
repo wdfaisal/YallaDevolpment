@@ -62,20 +62,21 @@ In Codemagic add the same flag to the build step's build arguments. The Gradle
 wrapper (`gradlew`, `gradle-wrapper.jar`) is intentionally not committed;
 Flutter regenerates it from the SDK before the Gradle build runs.
 
-Toolchain pinned in `android/` to the exact combination that the Flutter SDK
-ships in its own Android template (`flutter create`), so a CI image cannot pick
-an untested pairing:
+Toolchain pinned in `android/` to the lowest versions that Codemagic's newer
+Flutter accepts, while staying on artifacts that resolve reliably:
 
-- Gradle 9.3.1 (`android/gradle/wrapper/gradle-wrapper.properties`)
-- Android Gradle Plugin 9.1.0 (`android/settings.gradle.kts`)
+- Gradle 9.5.0 (`android/gradle/wrapper/gradle-wrapper.properties`)
+- Android Gradle Plugin 9.1.1 (`android/settings.gradle.kts`)
 - Kotlin 2.4.0, JDK 17+, `minSdk 24`, `compileSdk`/`targetSdk` from Flutter
 
-Do not bump the Android Gradle Plugin on its own. AGP 9.2.1 is published on
-Google Maven, but a Codemagic build failed to resolve its plugin marker
-(`Plugin [id: 'com.android.application', version: '9.2.1'] was not found`)
-while the same project resolved 9.1.0. When the build fails with a plugin that
-"was not found", clear the CI Gradle cache before changing versions again: a
-negative module cache entry survives between builds.
+Codemagic builds with a newer Flutter than the local SDK, and its Gradle plugin
+enforces minimums at build time (seen in CI: "Gradle 9.3.1 will soon be dropped",
+"AGP 9.1.0 is lower than Flutter's minimum supported 9.1.1"). Keep the pair at
+Gradle 9.5.0 / AGP 9.1.1 or higher. Avoid AGP 9.2.1: it is published on Google
+Maven, but CI failed to resolve its plugin marker
+(`Plugin [id: 'com.android.application', version: '9.2.1'] was not found`).
+When a plugin "was not found", clear the CI Gradle cache before changing
+versions again: a negative module cache entry survives between builds.
 
 ## Checks
 
