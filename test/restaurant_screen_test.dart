@@ -4,6 +4,8 @@ import 'package:yalla_talabat_customer/data/models/cart.dart';
 import 'package:yalla_talabat_customer/data/models/catalog.dart';
 import 'package:yalla_talabat_customer/presentation/restaurant/restaurant_screen.dart';
 import 'package:yalla_talabat_customer/presentation/restaurant/widgets/restaurant_cart_tray.dart';
+import 'package:yalla_talabat_customer/presentation/restaurant/widgets/restaurant_category_tabs.dart';
+import 'package:yalla_talabat_customer/presentation/restaurant/widgets/restaurant_meta_card.dart';
 import 'package:yalla_talabat_customer/presentation/restaurant/widgets/restaurant_top_bar.dart';
 import 'package:yalla_talabat_customer/state/cart_controller.dart';
 import 'package:yalla_talabat_customer/state/restaurant_detail_controller.dart';
@@ -187,6 +189,70 @@ void main() {
     expect(find.text('أخرى'), findsWidgets);
     expect(find.text('برجر دجاج 0'), findsOneWidget);
     expect(find.text('15,800'), findsWidgets);
+  });
+
+  testWidgets('the category strip sits right under the meta card', (
+    tester,
+  ) async {
+    await _pumpScreen(tester, _detail());
+
+    expect(find.byType(RestaurantTabsBar), findsOneWidget);
+    final cardBottom = tester.getBottomLeft(find.byType(RestaurantMetaCard)).dy;
+    final barTop = tester.getTopLeft(find.byType(RestaurantTabsBar)).dy;
+    final tabsTop = tester.getTopLeft(find.byType(RestaurantCategoryTabs)).dy;
+
+    // No blank sliver above the strip: it starts exactly where the card ends.
+    expect(barTop, moreOrLessEquals(cardBottom));
+    // The tab row keeps the compact `mt-2 pt-3` gap from the Stitch mock.
+    expect(
+      tabsTop,
+      moreOrLessEquals(cardBottom + RestaurantTabsBar.topPadding),
+    );
+  });
+
+  testWidgets('category tabs use the larger, tidier label style', (
+    tester,
+  ) async {
+    await _pumpScreen(tester, _detail());
+
+    final label = tester.widget<Text>(
+      find.descendant(
+        of: find.byType(RestaurantCategoryTabs),
+        matching: find.text('أخرى'),
+      ),
+    );
+    expect(label.style?.fontSize, 14);
+    expect(label.style?.fontWeight, FontWeight.w700);
+    expect(
+      tester.getSize(find.byType(RestaurantCategoryTabs)).height,
+      RestaurantCategoryTabs.height,
+    );
+  });
+
+  testWidgets('the category strip pins under the top bar while scrolling', (
+    tester,
+  ) async {
+    await _pumpScreen(tester, _detail(itemCount: 20));
+
+    final controller = tester
+        .widget<CustomScrollView>(find.byType(CustomScrollView))
+        .controller!;
+    controller.jumpTo(420);
+    await tester.pumpAndSettle();
+
+    final bars = find.byType(RestaurantTabsBar);
+    expect(bars, findsNWidgets(2));
+    // The in-flow strip has scrolled under the top bar while the pinned copy
+    // sits right below it instead of reserving space in the scroll view.
+    expect(tester.getTopLeft(bars.first).dy, lessThan(0));
+    expect(
+      tester.getTopLeft(bars.last).dy,
+      moreOrLessEquals(RestaurantTopBar.contentHeight),
+    );
+
+    controller.jumpTo(0);
+    await tester.pumpAndSettle();
+    expect(find.byType(RestaurantTabsBar), findsOneWidget);
   });
 
   testWidgets('the top bar picks up the title while scrolling', (tester) async {

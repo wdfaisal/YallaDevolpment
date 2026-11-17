@@ -1,7 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../core/config/env.dart';
 import '../data/api/api_client.dart';
 import '../data/api/token_store.dart';
+import '../data/push/push_service.dart';
 import '../data/repositories/account_repository.dart';
 import '../data/repositories/address_repository.dart';
 import '../data/repositories/auth_repository.dart';
@@ -56,3 +58,29 @@ final ordersRepositoryProvider = Provider<OrdersRepository>(
 final accountRepositoryProvider = Provider<AccountRepository>(
   (ref) => AccountRepository(ref.watch(apiClientProvider)),
 );
+
+/// Firebase Messaging wrapper. It is a safe no-op when the build has no
+/// Firebase credentials, so every screen can read it unconditionally.
+final pushServiceProvider = Provider<PushService>((ref) {
+  return PushService(
+    accountRepository: ref.watch(accountRepositoryProvider),
+    tokenStore: ref.watch(tokenStoreProvider),
+  );
+});
+
+/// Latest push availability reported by [PushService]. The notification screen
+/// uses it to explain honestly when OS push is unavailable.
+final pushStatusProvider = NotifierProvider<PushStatusController, PushStatus>(
+    PushStatusController.new);
+
+class PushStatusController extends Notifier<PushStatus> {
+  @override
+  PushStatus build() => Env.firebasePushConfigured
+      ? PushStatus.initializing
+      : PushStatus.unconfigured;
+
+  void set(PushStatus status) {
+    if (state == status) return;
+    state = status;
+  }
+}

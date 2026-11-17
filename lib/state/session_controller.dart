@@ -7,7 +7,8 @@ import 'providers.dart';
 /// Increments whenever the signed-in identity changes (sign-in, sign-out,
 /// expired session). Personal-data providers watch it and rebuild, which keeps
 /// session handling free of import cycles.
-final personalEpochProvider = NotifierProvider<PersonalEpoch, int>(PersonalEpoch.new);
+final personalEpochProvider =
+    NotifierProvider<PersonalEpoch, int>(PersonalEpoch.new);
 
 class PersonalEpoch extends Notifier<int> {
   @override
@@ -18,7 +19,8 @@ class PersonalEpoch extends Notifier<int> {
 
 /// The signed-in customer, or `null` for a guest. The session is restored from
 /// the secure token on launch and validated against the backend.
-final sessionProvider = AsyncNotifierProvider<SessionController, CustomerProfile?>(
+final sessionProvider =
+    AsyncNotifierProvider<SessionController, CustomerProfile?>(
   SessionController.new,
 );
 
@@ -90,6 +92,9 @@ class SessionController extends AsyncNotifier<CustomerProfile?> {
   }
 
   Future<void> signOut() async {
+    // Remove this device from the account while the session is still valid, so
+    // a signed-out phone stops receiving the account's order pushes.
+    await ref.read(pushServiceProvider).unregisterStoredToken();
     try {
       await ref.read(authRepositoryProvider).logout();
     } catch (_) {

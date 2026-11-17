@@ -43,6 +43,10 @@ class _RestaurantScreenState extends ConsumerState<RestaurantScreen> {
   final Set<String> _busyItems = <String>{};
   final ScrollController _scrollController = ScrollController();
   final ValueNotifier<double> _scrollOffset = ValueNotifier<double>(0);
+  final GlobalKey _tabsKey = GlobalKey();
+  final ValueNotifier<bool> _tabsPinned = ValueNotifier<bool>(false);
+  double _tabsPinnedTop = 0;
+  bool _tabsCheckScheduled = false;
 
   @override
   void initState() {
@@ -53,6 +57,27 @@ class _RestaurantScreenState extends ConsumerState<RestaurantScreen> {
   void _handleScroll() {
     if (!_scrollController.hasClients) return;
     _scrollOffset.value = _scrollController.offset;
+    _scheduleTabsPinnedUpdate();
+  }
+
+  void _scheduleTabsPinnedUpdate() {
+    if (_tabsCheckScheduled) return;
+    _tabsCheckScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _tabsCheckScheduled = false;
+      if (!mounted) return;
+      _syncTabsPinned();
+    });
+  }
+
+  /// Pins the category strip once the in-flow strip reaches the top bar. The
+  /// strip is measured after layout instead of assumed, so it works with any
+  /// card height.
+  void _syncTabsPinned() {
+    final box = _tabsKey.currentContext?.findRenderObject();
+    if (box is! RenderBox || !box.attached || !box.hasSize) return;
+    final pinned = box.localToGlobal(Offset.zero).dy <= _tabsPinnedTop + 0.5;
+    if (_tabsPinned.value != pinned) _tabsPinned.value = pinned;
   }
 
   @override
@@ -61,6 +86,7 @@ class _RestaurantScreenState extends ConsumerState<RestaurantScreen> {
       ..removeListener(_handleScroll)
       ..dispose();
     _scrollOffset.dispose();
+    _tabsPinned.dispose();
     super.dispose();
   }
 
@@ -128,6 +154,8 @@ class _RestaurantScreenState extends ConsumerState<RestaurantScreen> {
     final cardTop = RestaurantHero.height - RestaurantHero.metaOverlap;
     final titleStart =
         cardTop + AppSpacing.xl - topInset - RestaurantTopBar.contentHeight;
+    // The pinned strip starts right below the top bar.
+    _tabsPinnedTop = topInset + RestaurantTopBar.contentHeight;
 
     return Stack(
       children: [
@@ -145,20 +173,17 @@ class _RestaurantScreenState extends ConsumerState<RestaurantScreen> {
               if (!restaurant.isOpen)
                 SliverToBoxAdapter(child: _closedNotice(l10n)),
               if (categories.isNotEmpty)
-                SliverPersistentHeader(
-                  pinned: true,
-                  delegate: RestaurantTabsHeaderDelegate(
-                    topInset: topInset + RestaurantTopBar.contentHeight,
-                    child: RestaurantCategoryTabs(
-                      categories: categories,
-                      selectedId: selectedId,
-                      onSelected: (id) => setState(() => _categoryId = id),
-                      onOpenMenu: () => _openMenuSheet(
-                        context,
-                        detail,
-                        categories,
-                        selectedId,
-                      ),
+                SliverToBoxAdapter(
+                  child: RestaurantTabsBar(
+                    key: _tabsKey,
+                    categories: categories,
+                    selectedId: selectedId,
+                    onSelected: (id) => setState(() => _categoryId = id),
+                    onOpenMenu: () => _openMenuSheet(
+                      context,
+                      detail,
+                      categories,
+                      selectedId,
                     ),
                   ),
                 ),
@@ -214,6 +239,29 @@ class _RestaurantScreenState extends ConsumerState<RestaurantScreen> {
             ],
           ),
         ),
+        if (categories.isNotEmpty)
+          Positioned(
+            top: topInset + RestaurantTopBar.contentHeight,
+            left: 0,
+            right: 0,
+            child: ValueListenableBuilder<bool>(
+              valueListenable: _tabsPinned,
+              builder: (context, pinned, _) {
+                if (!pinned) return const SizedBox.shrink();
+                return RestaurantTabsBar(
+                  categories: categories,
+                  selectedId: selectedId,
+                  onSelected: (id) => setState(() => _categoryId = id),
+                  onOpenMenu: () => _openMenuSheet(
+                    context,
+                    detail,
+                    categories,
+                    selectedId,
+                  ),
+                );
+              },
+            ),
+          ),
         Positioned(
           top: 0,
           left: 0,

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -10,7 +11,9 @@ import '../../core/widgets/snack.dart';
 import '../../core/widgets/states.dart';
 import '../../data/api/api_exception.dart';
 import '../../data/models/account.dart';
+import '../../data/push/push_service.dart';
 import '../../state/account_controllers.dart';
+import '../../state/providers.dart';
 import '../../state/session_controller.dart';
 import 'notifications_view_data.dart';
 import 'widgets/notification_card.dart';
@@ -61,6 +64,13 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
     final l10n = L10n.of(context);
     final signedIn = ref.watch(isSignedInProvider);
     final enabled = ref.watch(notificationsEnabledProvider);
+    final pushStatus = ref.watch(pushStatusProvider);
+    final pushNote = _pushNote(l10n, pushStatus);
+    // A failure is retryable everywhere. A denial is only retryable in a
+    // browser, where the permission prompt needs a fresh user gesture; on a
+    // phone a denied permission is changed in the system settings instead.
+    final canRetryPush = pushStatus == PushStatus.failed ||
+        (pushStatus == PushStatus.denied && kIsWeb);
     final pageAsync = ref.watch(notificationsProvider);
     final page = pageAsync.valueOrNull;
     final unread = page?.unreadCount ?? 0;
@@ -94,6 +104,8 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
               l10n: l10n,
               signedIn: signedIn,
               enabled: enabled,
+              pushNote: pushNote,
+              canRetryPush: canRetryPush,
               pageAsync: pageAsync,
             ),
           ),
@@ -106,6 +118,8 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
     required L10n l10n,
     required bool signedIn,
     required bool enabled,
+    required String? pushNote,
+    required bool canRetryPush,
     required AsyncValue<NotificationPage> pageAsync,
   }) {
     if (!signedIn) {
@@ -135,6 +149,9 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                 .setEnabled(value),
             onManage: () => context.push('/account/settings'),
             versionLabel: _versionLabel(l10n),
+            pushNote: pushNote,
+            pushActionLabel: canRetryPush ? l10n.pushEnableAction : null,
+            onPushAction: canRetryPush ? _enablePush : null,
           ),
         ],
       );
@@ -203,6 +220,9 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                   .setEnabled(value),
               onManage: () => context.push('/account/settings'),
               versionLabel: _versionLabel(l10n),
+              pushNote: pushNote,
+              pushActionLabel: canRetryPush ? l10n.pushEnableAction : null,
+              onPushAction: canRetryPush ? _enablePush : null,
             ),
           ),
         );
@@ -225,7 +245,32 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
     );
   }
 
+  String? _pushNote(L10n l10n, PushStatus status) {
+    switch (status) {
+      case PushStatus.unconfigured:
+        return l10n.pushUnavailableNote;
+      case PushStatus.initializing:
+        return null;
+      case PushStatus.denied:
+        return l10n.pushDeniedNote;
+      case PushStatus.failed:
+        return l10n.pushFailedNote;
+      case PushStatus.ready:
+        return l10n.pushReadyNote;
+    }
+  }
+
   String _versionLabel(L10n l10n) => '${l10n.versionShort} ${Env.appVersion}';
+
+  /// Retries OS push from a real tap. Browsers only allow the notification
+  /// permission prompt inside a user gesture, so this is what turns a `denied`
+  /// or `failed` web state into a working token.
+  Future<void> _enablePush() async {
+    final service = ref.read(pushServiceProvider);
+    await service.registerCurrentToken();
+    if (!mounted) return;
+    ref.read(pushStatusProvider.notifier).set(service.status);
+  }
 
   Future<void> _open(CustomerNotification item) async {
     await _markRead(item, L10n.of(context));

@@ -13,12 +13,23 @@ class NotificationSettingsCard extends StatelessWidget {
     required this.onChanged,
     required this.onManage,
     required this.versionLabel,
+    this.pushNote,
+    this.pushActionLabel,
+    this.onPushAction,
   });
 
   final bool enabled;
   final ValueChanged<bool> onChanged;
   final VoidCallback onManage;
   final String versionLabel;
+
+  /// Honest explanation of the OS push channel state. Null hides the line.
+  final String? pushNote;
+
+  /// Shown only when the customer can retry enabling OS push (for example the
+  /// browser blocked the permission prompt until a tap).
+  final String? pushActionLabel;
+  final VoidCallback? onPushAction;
 
   @override
   Widget build(BuildContext context) {
@@ -70,6 +81,55 @@ class NotificationSettingsCard extends StatelessWidget {
                         height: 1.55,
                       ),
                     ),
+                    if (pushNote != null) ...[
+                      const SizedBox(height: 6),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Icon(
+                            Icons.info_outline,
+                            size: 14,
+                            color: AppColors.onSurfaceVariant,
+                          ),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              pushNote!,
+                              style: AppTypography.bodySm.copyWith(
+                                fontSize: 10.5,
+                                color: AppColors.onSurfaceVariant,
+                                height: 1.5,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                    if (pushActionLabel != null && onPushAction != null) ...[
+                      const SizedBox(height: 4),
+                      Align(
+                        alignment: AlignmentDirectional.centerStart,
+                        child: TextButton(
+                          onPressed: onPushAction,
+                          style: TextButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 4,
+                              vertical: 2,
+                            ),
+                            minimumSize: Size.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                          child: Text(
+                            pushActionLabel!,
+                            style: AppTypography.labelMd.copyWith(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),

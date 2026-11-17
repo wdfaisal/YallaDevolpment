@@ -373,6 +373,50 @@ void main() {
       await tester.tap(find.text(_l10n.manageNotificationSettings));
       expect(managed, 1);
     });
+
+    testWidgets('explains push state and retries from a tap', (tester) async {
+      var retried = 0;
+      await tester.pumpWidget(
+        testApp(
+          Scaffold(
+            body: NotificationSettingsCard(
+              enabled: true,
+              onChanged: (_) {},
+              onManage: () {},
+              versionLabel: 'v1.0.0',
+              pushNote: _l10n.pushDeniedNote,
+              pushActionLabel: _l10n.pushEnableAction,
+              onPushAction: () => retried++,
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text(_l10n.pushDeniedNote), findsOneWidget);
+      await tester.tap(find.text(_l10n.pushEnableAction));
+      expect(retried, 1);
+    });
+
+    testWidgets('hides the push action when nothing can be retried', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        testApp(
+          Scaffold(
+            body: NotificationSettingsCard(
+              enabled: true,
+              onChanged: (_) {},
+              onManage: () {},
+              versionLabel: 'v1.0.0',
+              pushNote: _l10n.pushUnavailableNote,
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text(_l10n.pushUnavailableNote), findsOneWidget);
+      expect(find.text(_l10n.pushEnableAction), findsNothing);
+    });
   });
 
   group('NotificationEmptyState', () {

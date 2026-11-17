@@ -9,7 +9,7 @@ import '../../../core/widgets/app_image.dart';
 import '../../../data/models/catalog.dart';
 import '../../shared/restaurant_widgets.dart';
 
-/// White meta card that overlaps the hero by 32px. Flat surface: a hairline
+/// White meta card that overlaps the hero image. Flat surface: a hairline
 /// border replaces the shadow from the original Stitch mock.
 class RestaurantMetaCard extends StatelessWidget {
   const RestaurantMetaCard({

@@ -11,11 +11,13 @@ class TokenStore {
   static const String _key = 'yalla_customer_session_token';
   static const String _notificationsKey =
       'yalla_customer_notifications_enabled';
+  static const String _deviceTokenKey = 'yalla_customer_device_token';
 
   final FlutterSecureStorage _storage;
   String? _memory;
   String _language = 'ar';
   bool _notificationsEnabled = true;
+  String? _deviceToken;
 
   /// Last persisted UI language (`ar`/`en`), available synchronously after
   /// [loadPreferences] runs at startup.
@@ -25,11 +27,18 @@ class TokenStore {
   /// after [loadPreferences] runs at startup. Defaults to enabled.
   bool get cachedNotificationsEnabled => _notificationsEnabled;
 
+  /// The last device token successfully registered with the backend, so it can
+  /// be unregistered on sign-out without waiting for Firebase.
+  String? get cachedDeviceToken => _deviceToken;
+
   Future<void> loadPreferences() async {
     final stored = await readLanguage();
-    if (stored != null && (stored == 'ar' || stored == 'en')) _language = stored;
+    if (stored != null && (stored == 'ar' || stored == 'en')) {
+      _language = stored;
+    }
     final notifications = await readNotificationsEnabled();
     if (notifications != null) _notificationsEnabled = notifications;
+    _deviceToken = await readDeviceToken();
   }
 
   Future<String?> read() async {
@@ -96,6 +105,34 @@ class TokenStore {
       );
     } catch (_) {
       // Notification preference is non-critical.
+    }
+  }
+
+  Future<String?> readDeviceToken() async {
+    if (_deviceToken != null) return _deviceToken;
+    try {
+      _deviceToken = await _storage.read(key: _deviceTokenKey);
+    } catch (_) {
+      _deviceToken = null;
+    }
+    return _deviceToken;
+  }
+
+  Future<void> writeDeviceToken(String token) async {
+    _deviceToken = token;
+    try {
+      await _storage.write(key: _deviceTokenKey, value: token);
+    } catch (_) {
+      // The token can be registered again on the next launch.
+    }
+  }
+
+  Future<void> clearDeviceToken() async {
+    _deviceToken = null;
+    try {
+      await _storage.delete(key: _deviceTokenKey);
+    } catch (_) {
+      // Nothing to clean up.
     }
   }
 }

@@ -29,19 +29,50 @@ class AccountRepository {
   }
 
   Future<CustomerNotification> markRead(String id) async {
-    final data = await _api.post<Map<String, dynamic>>('/api/customer/notifications/$id/read');
+    final data = await _api
+        .post<Map<String, dynamic>>('/api/customer/notifications/$id/read');
     return CustomerNotification.fromJson(data);
   }
 
-  Future<void> markAllRead() => _api.post<dynamic>('/api/customer/notifications/read-all');
+  Future<void> markAllRead() =>
+      _api.post<dynamic>('/api/customer/notifications/read-all');
+
+  /// Registers the current FCM device token with the backend. The token is
+  /// reassigned to the signed-in customer when the same device switches
+  /// accounts.
+  Future<void> registerDevice({
+    required String token,
+    required String platform,
+    String? appVersion,
+  }) async {
+    await _api.post<dynamic>(
+      '/api/customer/devices',
+      body: {
+        'token': token,
+        'platform': platform,
+        if (appVersion != null && appVersion.isNotEmpty)
+          'appVersion': appVersion,
+      },
+    );
+  }
+
+  Future<void> unregisterDevice(String token) async {
+    await _api.delete<dynamic>(
+      '/api/customer/devices',
+      body: {'token': token},
+    );
+  }
 
   Future<List<SupportTicket>> tickets() async {
     final data = await _api.get<List<dynamic>>('/api/customer/tickets');
-    return data.map((e) => SupportTicket.fromJson(e as Map<String, dynamic>)).toList();
+    return data
+        .map((e) => SupportTicket.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
   Future<SupportTicket> ticket(String id) async {
-    final data = await _api.get<Map<String, dynamic>>('/api/customer/tickets/$id');
+    final data =
+        await _api.get<Map<String, dynamic>>('/api/customer/tickets/$id');
     return SupportTicket.fromJson(data);
   }
 
@@ -93,7 +124,8 @@ class AccountRepository {
         if (driverStars != null)
           'driver': {
             'stars': driverStars,
-            if (driverComment != null && driverComment.isNotEmpty) 'comment': driverComment,
+            if (driverComment != null && driverComment.isNotEmpty)
+              'comment': driverComment,
           },
       },
     );

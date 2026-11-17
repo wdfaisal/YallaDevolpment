@@ -536,6 +536,24 @@ class L10n {
       );
   String get enableNotifications =>
       _t('تفعيل التنبيهات', 'Enable notifications');
+  String get pushUnavailableNote => _t(
+        'تنبيهات النظام (Push) غير مهيأة في هذا الإصدار؛ تصلك تحديثاتك داخل التطبيق.',
+        'System push is not configured in this build; updates still arrive in the app.',
+      );
+  String get pushDeniedNote => _t(
+        'تنبيهات النظام معطّلة من إعدادات جهازك. فعّلها من إعدادات النظام لتصلك التنبيهات خارج التطبيق.',
+        'System push is off in your device settings. Enable it there to receive alerts outside the app.',
+      );
+  String get pushFailedNote => _t(
+        'تعذّر تهيئة تنبيهات النظام. تصلك تحديثاتك داخل التطبيق.',
+        'System push could not be initialised. Updates still arrive in the app.',
+      );
+  String get pushReadyNote => _t(
+        'تنبيهات النظام (Push) مفعّلة على هذا الجهاز.',
+        'System push is enabled on this device.',
+      );
+  String get pushEnableAction =>
+      _t('تفعيل تنبيهات النظام', 'Enable system push');
   String get unreadNotificationsPrefix => _t('لديك', 'You have');
   String get unreadNotificationsSuffix =>
       _t('إشعارات غير مقروءة', 'unread notifications');
@@ -660,8 +678,7 @@ class L10n {
   String get yallaCaptain =>
       _t('كابتن توصيل يلا المعتمد', 'Yalla certified delivery captain');
   String get movingNow => _t('متحرك', 'Moving');
-  String get recenterMap =>
-      _t('إعادة ضبط الخريطة', 'Recenter map');
+  String get recenterMap => _t('إعادة ضبط الخريطة', 'Recenter map');
   String get mapUnavailable => _t(
         'لا تتوفر إحداثيات لهذا الطلب على الخريطة',
         'No map coordinates are available for this order',
@@ -670,8 +687,7 @@ class L10n {
   String get fullReceipt => _t('الفاتورة الكاملة', 'Full receipt');
   String get deliveredAndReceived =>
       _t('تم التسليم والاستلام', 'Delivered & received');
-  String get deliveredSoonDetail =>
-      _t('بالعافية مقدماً!', 'Enjoy your meal!');
+  String get deliveredSoonDetail => _t('بالعافية مقدماً!', 'Enjoy your meal!');
   String get plateLabel => _t('لوحة', 'Plate');
   String get itemsFromRestaurant => _t('أصناف من', 'items from');
   String get totalPaid => _t('المجموع الكلي المدفوع', 'Total paid');
@@ -767,6 +783,31 @@ class L10n {
   String get walletAdjustment => _t('تسوية', 'Adjustment');
   String get walletTopUp => _t('شحن المحفظة', 'Wallet top-up');
   String get walletWithdrawal => _t('سحب من المحفظة', 'Wallet withdrawal');
+
+  // Wallet redesign (Stitch wallet screen)
+  String get walletDigitalBalance =>
+      _t('رصيدك الرقمي وحركات الدفع', 'Your digital balance and payments');
+  String get walletCash => _t('يلا طلبات كاش', 'Yalla Talabat Cash');
+  String get walletAvailableInstant =>
+      _t('الرصيد المتاح للاستخدام الفوري', 'Available to spend right now');
+  String get walletSecurePayment =>
+      _t('حماية دفع موثوقة 100%', '100% secure payment protection');
+  String get walletTopUpAction => _t('شحن الرصيد', 'Top up balance');
+  String get walletGift => _t('إهداء رصيد', 'Gift balance');
+  String get walletRewards => _t('المكافآت', 'Rewards');
+  String get walletRecent => _t('العمليات الأخيرة', 'Recent activity');
+  String get walletViewAll => _t('عرض الكل', 'View all');
+  String get walletFilterAll => _t('الكل', 'All');
+  String get walletFilterTopUp => _t('شحن رصيد', 'Top up');
+  String get walletFilterPurchases => _t('مشتريات', 'Purchases');
+  String get walletFilterCashback => _t('استرداد نقدي', 'Cashback');
+  String get walletHelp => _t('الأسئلة الشائعة والدعم', 'Help & support');
+  String get walletCompleted => _t('مكتمل', 'Completed');
+  String get walletReadOnlyNotice => _t(
+      'يمكنك استخدام الرصيد للدفع عند إتمام الطلب. شحن المحفظة غير متاح حالياً.',
+      'You can use this balance at checkout. Wallet top-up is not available yet.');
+  String get walletGiftUnavailable => _t(
+      'إهداء الرصيد غير متاح حالياً', 'Gifting balance is not available yet');
 
   // Loyalty extras
   String get loyaltyInfo => _t('تُضاف النقاط بعد إتمام الطلبات.',

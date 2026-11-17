@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/design/app_colors.dart';
+import '../../../core/design/app_spacing.dart';
 import '../../../core/design/app_typography.dart';
 import '../../../core/localization/l10n.dart';
 import '../../../data/models/catalog.dart';
@@ -21,13 +22,23 @@ class RestaurantCategoryTabs extends StatefulWidget {
   final ValueChanged<String> onSelected;
   final VoidCallback onOpenMenu;
 
+  /// Row height sized for the 14px labels plus the 2px selected underline.
+  static const double height = 46;
+
   @override
-  State<RestaurantCategoryTabs> createState() =>
-      _RestaurantCategoryTabsState();
+  State<RestaurantCategoryTabs> createState() => _RestaurantCategoryTabsState();
 }
 
 class _RestaurantCategoryTabsState extends State<RestaurantCategoryTabs> {
   final Map<String, GlobalKey> _tabKeys = <String, GlobalKey>{};
+
+  @override
+  void initState() {
+    super.initState();
+    // The strip is recreated when it is promoted to the pinned overlay, so
+    // bring the active tab back into view as soon as it mounts.
+    _revealSelected();
+  }
 
   @override
   void didUpdateWidget(covariant RestaurantCategoryTabs oldWidget) {
@@ -57,74 +68,100 @@ class _RestaurantCategoryTabsState extends State<RestaurantCategoryTabs> {
   Widget build(BuildContext context) {
     final l10n = L10n.of(context);
     return SizedBox(
-      height: 44,
-      child: Row(
+      height: RestaurantCategoryTabs.height,
+      child: Stack(
         children: [
-          Container(
-            height: 44,
-            padding: const EdgeInsetsDirectional.only(end: 12),
-            margin: const EdgeInsetsDirectional.only(end: 4),
-            decoration: const BoxDecoration(
-              border: BorderDirectional(
-                end: BorderSide(color: AppColors.surfaceContainerHighest),
-              ),
-            ),
-            child: Tooltip(
-              message: l10n.menuSections,
-              child: InkWell(
-                borderRadius: BorderRadius.circular(8),
-                onTap: widget.onOpenMenu,
-                child: const SizedBox(
-                  width: 40,
-                  height: 44,
-                  child: Icon(
-                    Icons.menu,
-                    size: 22,
-                    color: AppColors.onSurface,
-                  ),
-                ),
-              ),
+          // Full-width hairline behind the tabs, so the active tab's 2px
+          // underline covers it exactly instead of stacking a second line.
+          PositionedDirectional(
+            start: 0,
+            end: 0,
+            bottom: 0,
+            child: Container(
+              height: 1,
+              color: AppColors.surfaceContainerHigh,
             ),
           ),
-          Expanded(
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsetsDirectional.only(end: 16),
-              itemCount: widget.categories.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 20),
-              itemBuilder: (context, index) {
-                final category = widget.categories[index];
-                final selected = category.id == widget.selectedId;
-                return InkWell(
-                  key: _tabKeys.putIfAbsent(category.id, GlobalKey.new),
-                  onTap: () => widget.onSelected(category.id),
-                  child: Container(
-                    alignment: Alignment.bottomCenter,
-                    padding: const EdgeInsets.only(top: 4, bottom: 10),
-                    decoration: BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(
-                          color: selected
-                              ? AppColors.onSurface
-                              : Colors.transparent,
-                          width: 2,
+          Positioned.fill(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Container(
+                  padding: const EdgeInsetsDirectional.only(
+                    end: AppSpacing.md,
+                  ),
+                  margin: const EdgeInsetsDirectional.only(end: AppSpacing.xs),
+                  decoration: const BoxDecoration(
+                    border: BorderDirectional(
+                      end: BorderSide(
+                        color: AppColors.surfaceContainerHighest,
+                      ),
+                    ),
+                  ),
+                  child: Tooltip(
+                    message: l10n.menuSections,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(AppSpacing.radius),
+                      onTap: widget.onOpenMenu,
+                      child: const SizedBox(
+                        width: 44,
+                        child: Icon(
+                          Icons.menu,
+                          size: 22,
+                          color: AppColors.onSurface,
                         ),
                       ),
                     ),
-                    child: Text(
-                      category.name,
-                      style: AppTypography.labelMd.copyWith(
-                        color: selected
-                            ? AppColors.onSurface
-                            : AppColors.secondary,
-                        fontWeight: selected
-                            ? FontWeight.w700
-                            : FontWeight.w500,
-                      ),
-                    ),
                   ),
-                );
-              },
+                ),
+                Expanded(
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsetsDirectional.only(
+                      end: AppSpacing.lg,
+                    ),
+                    itemCount: widget.categories.length,
+                    separatorBuilder: (_, __) =>
+                        const SizedBox(width: AppSpacing.lg),
+                    itemBuilder: (context, index) {
+                      final category = widget.categories[index];
+                      final selected = category.id == widget.selectedId;
+                      return InkWell(
+                        key: _tabKeys.putIfAbsent(category.id, GlobalKey.new),
+                        onTap: () => widget.onSelected(category.id),
+                        child: Container(
+                          alignment: AlignmentDirectional.bottomCenter,
+                          padding: const EdgeInsetsDirectional.only(
+                            bottom: 10,
+                          ),
+                          decoration: BoxDecoration(
+                            border: Border(
+                              bottom: BorderSide(
+                                color: selected
+                                    ? AppColors.onSurface
+                                    : Colors.transparent,
+                                width: 2,
+                              ),
+                            ),
+                          ),
+                          child: Text(
+                            category.name,
+                            maxLines: 1,
+                            softWrap: false,
+                            style: AppTypography.labelLg.copyWith(
+                              color: selected
+                                  ? AppColors.onSurface
+                                  : AppColors.secondary,
+                              fontWeight:
+                                  selected ? FontWeight.w700 : FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -133,42 +170,52 @@ class _RestaurantCategoryTabsState extends State<RestaurantCategoryTabs> {
   }
 }
 
-/// Pins the category strip under the status bar while the menu scrolls.
-class RestaurantTabsHeaderDelegate extends SliverPersistentHeaderDelegate {
-  RestaurantTabsHeaderDelegate({required this.child, required this.topInset});
+/// Flat strip that carries the category tabs. It is rendered once in the
+/// scroll flow right under the meta card, and once as a pinned overlay while
+/// the menu scrolls, so the tabs stick below the top bar without reserving a
+/// blank gap above them at rest.
+class RestaurantTabsBar extends StatelessWidget {
+  const RestaurantTabsBar({
+    super.key,
+    required this.categories,
+    required this.selectedId,
+    required this.onSelected,
+    required this.onOpenMenu,
+  });
 
-  final Widget child;
-  final double topInset;
+  final List<CatalogMenuCategory> categories;
+  final String? selectedId;
+  final ValueChanged<String> onSelected;
+  final VoidCallback onOpenMenu;
 
-  static const double _rowHeight = 44;
-  static const double _topPadding = 8;
+  /// Gap between the meta card and the tab row from the Stitch mock
+  /// (`mt-2` + `pt-3`).
+  static const double topPadding = 20;
+
+  /// White breathing room below the row hairline (`pb-1`).
+  static const double bottomPadding = 4;
+
+  static const double rowHeight = RestaurantCategoryTabs.height;
+
+  /// Total strip height, including the row's 1px hairline.
+  static const double height = topPadding + rowHeight + bottomPadding;
 
   @override
-  double get minExtent => topInset + _topPadding + _rowHeight + 1;
-
-  @override
-  double get maxExtent => minExtent;
-
-  @override
-  Widget build(
-    BuildContext context,
-    double shrinkOffset,
-    bool overlapsContent,
-  ) {
+  Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.only(top: topInset + _topPadding),
+      padding: const EdgeInsetsDirectional.only(
+        top: topPadding,
+        bottom: bottomPadding,
+      ),
       decoration: const BoxDecoration(
         color: AppColors.surfaceContainerLowest,
-        border: Border(
-          bottom: BorderSide(color: AppColors.surfaceContainerHigh),
-        ),
       ),
-      child: child,
+      child: RestaurantCategoryTabs(
+        categories: categories,
+        selectedId: selectedId,
+        onSelected: onSelected,
+        onOpenMenu: onOpenMenu,
+      ),
     );
-  }
-
-  @override
-  bool shouldRebuild(covariant RestaurantTabsHeaderDelegate oldDelegate) {
-    return oldDelegate.child != child || oldDelegate.topInset != topInset;
   }
 }
