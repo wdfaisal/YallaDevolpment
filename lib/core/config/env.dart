@@ -21,7 +21,7 @@ class Env {
   /// Override with `--dart-define=LAN_HOST=192.168.1.10`.
   static const String _lanHost = String.fromEnvironment(
     'LAN_HOST',
-    defaultValue: '10.160.175.182',
+    defaultValue: '10.131.76.182',
   );
 
   /// Base URL of the backend.
