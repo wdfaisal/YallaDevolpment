@@ -49,7 +49,12 @@ class PushService {
   /// Initialises Firebase once. Returns [PushStatus.unconfigured] without
   /// touching Firebase when the build has no credentials.
   Future<PushStatus> initialize() async {
-    if (_initialised) return _status;
+    // A failed attempt may be retried (for example after a temporary network
+    // error), so it must not latch the service into a permanent failure. When
+    // Firebase is already up, there is nothing to redo.
+    if (_initialised && (_messaging != null || _status != PushStatus.failed)) {
+      return _status;
+    }
     _initialised = true;
 
     if (!Env.firebasePushConfigured) {
@@ -148,12 +153,39 @@ class PushService {
     }
   }
 
+  /// Asks for the OS notification permission as soon as the app opens.
+  ///
+  /// Guests are asked too: the permission and the FCM token belong to the
+  /// device, not to an account. The token is cached locally and registered with
+  /// the backend when the customer signs in, so the OS prompt appears on first
+  /// open instead of waiting for the first sign-in or order.
+  ///
+  /// Returns the resulting status. A guest with a token stays `initializing`
+  /// because no backend row exists yet; it becomes `ready` only after
+  /// [registerCurrentToken] succeeds.
+  Future<PushStatus> prepareForPush() async {
+    await initialize();
+    if (_messaging == null) return _status;
+
+    if (!await requestPermission()) return _status;
+
+    final token = await currentToken();
+    if (token == null || token.isEmpty) {
+      if (_status != PushStatus.failed) _status = PushStatus.initializing;
+      return _status;
+    }
+
+    await _tokenStore.writeDeviceToken(token);
+    if (_status != PushStatus.ready) _status = PushStatus.initializing;
+    return _status;
+  }
+
   /// Asks for permission, obtains the FCM token and stores it on the backend.
   ///
   /// Sets [status] so callers can show the honest reason: `denied` when the OS
   /// permission is off, `failed` when the token or the backend call fails.
   Future<bool> registerCurrentToken() async {
-    if (!_initialised) await initialize();
+    await initialize();
     if (_messaging == null) return false;
     if (!await requestPermission()) {
       if (_status != PushStatus.failed) _status = PushStatus.denied;

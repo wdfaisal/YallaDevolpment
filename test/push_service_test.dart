@@ -43,6 +43,14 @@ void main() {
     expect(await service.initialMessage(), isNull);
   });
 
+  test('startup permission request is a no-op without Firebase', () async {
+    final service = buildService();
+    await service.initialize();
+
+    expect(await service.prepareForPush(), PushStatus.unconfigured);
+    expect(service.status, PushStatus.unconfigured);
+  });
+
   test('unregistering a stored token is a safe no-op', () async {
     final service = buildService();
     await service.initialize();

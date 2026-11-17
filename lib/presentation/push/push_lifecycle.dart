@@ -66,6 +66,16 @@ class _PushLifecycleState extends ConsumerState<PushLifecycle> {
     final initial = await service.initialMessage();
     if (initial != null && mounted) _onOpened(initial);
 
+    // Ask for the OS permission on first open, before sign-in, so the prompt is
+    // not deferred until the customer's first order. A guest gets a cached
+    // token that is registered as soon as the account signs in.
+    final prepared = await service.prepareForPush();
+    if (!mounted) return;
+    ref.read(pushStatusProvider.notifier).set(prepared);
+    if (prepared == PushStatus.denied || prepared == PushStatus.failed) {
+      return;
+    }
+
     await _registerIfSignedIn();
   }
 
