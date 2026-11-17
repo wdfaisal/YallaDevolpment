@@ -19,7 +19,12 @@ pluginManagement {
 
 plugins {
     id("dev.flutter.flutter-plugin-loader") version "1.0.0"
-    id("com.android.application") version "9.2.1" apply false
+    // Keep these three versions in the exact combination that the installed
+    // Flutter SDK ships in its own Android template. A newer AGP (9.2.x) fails
+    // to resolve from Google Maven on CI even though the artifact is published,
+    // and an untested AGP/Gradle pair is not worth the risk for a build that
+    // only has to produce a testable APK.
+    id("com.android.application") version "9.1.0" apply false
     id("org.jetbrains.kotlin.android") version "2.4.0" apply false
 }
 
