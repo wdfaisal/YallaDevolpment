@@ -104,6 +104,7 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
           height: _mapHeight,
           tiles: tiles,
           route: route,
+          tileDio: ref.watch(mapTileDioProvider),
           onBack: () => context.pop(),
           onCancel: summary.canCancel
               ? () => _cancel(context, l10n, summary.id)

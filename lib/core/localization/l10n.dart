@@ -469,6 +469,19 @@ class L10n {
   String get pastOrders => _t('الطلبات السابقة', 'Past orders');
   String get noOrders => _t('لا توجد طلبات بعد', 'No orders yet');
   String get noActiveOrders => _t('لا توجد طلبات نشطة', 'No active orders');
+  String get noPastOrders => _t('لا توجد طلبات سابقة', 'No past orders');
+  String get noActiveOrdersMessage => _t(
+        'اطلب من مطعمك المفضل، وسيظهر طلبك هنا لحظة تأكيده.',
+        'Order from your favourite restaurant and it will show up here once confirmed.',
+      );
+  String get noPastOrdersMessage => _t(
+        'ستجد هنا طلباتك المكتملة والملغاة، لتعيد الطلب أو تقيّمه.',
+        'Completed and cancelled orders land here so you can reorder or rate them.',
+      );
+  String get ordersGuestMessage => _t(
+        'سجّل الدخول لمتابعة طلباتك النشطة والسابقة.',
+        'Sign in to follow your active and past orders.',
+      );
   String get orderDetails => _t('تفاصيل الطلب', 'Order details');
   String get cancelOrder => _t('إلغاء الطلب', 'Cancel order');
   String get cancelReason =>
@@ -594,7 +607,17 @@ class L10n {
   String get writeReply => _t('اكتب ردك…', 'Write your reply…');
 
   // Favorites
+  String get favoritesSubtitle =>
+      _t('مطاعمك وأطباقك المحفوظة', 'Your saved restaurants and dishes');
+  String get favoritesGuestMessage => _t(
+        'سجّل الدخول لعرض مطاعمك وأطباقك المحفوظة.',
+        'Sign in to see the restaurants and dishes you saved.',
+      );
   String get noFavorites => _t('لا توجد مفضلات بعد', 'No favorites yet');
+  String get favoriteRestaurantsTitle =>
+      _t('لا توجد مطاعم محفوظة', 'No saved restaurants');
+  String get favoriteItemsTitle =>
+      _t('لا توجد أطباق محفوظة', 'No saved dishes');
   String get noFavoriteRestaurants => _t('أضف مطاعم إلى المفضلة لتجدها هنا.',
       'Save restaurants to find them here.');
   String get noFavoriteItems => _t(
@@ -614,6 +637,7 @@ class L10n {
   String get add => _t('إضافة', 'Add');
   String get useAddress => _t('استخدام هذا العنوان', 'Use this address');
   String get viewRestaurant => _t('عرض المطعم', 'View restaurant');
+  String get viewDish => _t('عرض الطبق', 'View dish');
   String get today => _t('اليوم', 'Today');
   String get secondsShort => _t('ث', 's');
 

@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -8,6 +9,7 @@ import '../../../core/design/app_typography.dart';
 import '../../../core/localization/l10n.dart';
 import '../../../data/models/maps.dart';
 import '../../../data/models/orders.dart';
+import '../../shared/api_tile_provider.dart';
 
 /// Full-bleed live map from the Stitch tracking design.
 ///
@@ -25,6 +27,7 @@ class TrackingMapHero extends StatefulWidget {
     this.onCancel,
     this.tiles,
     this.route,
+    this.tileDio,
     this.loadTiles = true,
     this.animatePulse = true,
   });
@@ -48,6 +51,11 @@ class TrackingMapHero extends StatefulWidget {
   /// line and the page shows no road distance.
   final MapRoute? route;
 
+  /// HTTP client used for raster tiles. Injected from `mapTileDioProvider` so
+  /// the map shares the app's Dio stack instead of flutter_map's native-only
+  /// network path.
+  final Dio? tileDio;
+
   /// Disabled in widget tests so no network tile request is attempted.
   final bool loadTiles;
 
@@ -63,13 +71,19 @@ class _TrackingMapHeroState extends State<TrackingMapHero>
   final MapController _map = MapController();
   late final AnimationController _pulse;
 
-  /// One long-lived provider per tile template so the underlying HTTP client is
-  /// reused across rebuilds and disposed with the page.
-  NetworkTileProvider? _tileProvider;
+  /// One long-lived provider per tile template so the in-memory tile cache and
+  /// the HTTP client are reused across rebuilds and released with the page.
+  ApiTileProvider? _tileProvider;
 
   /// Template plus authorisation of the provider currently alive. A new session
   /// token must rebuild the provider even when the URL is unchanged.
   String? _tileSignature;
+
+  /// Honest failure state: after repeated tile failures the page says the map
+  /// could not be loaded instead of leaving an unexplained empty area. Any
+  /// successful tile clears it again.
+  int _consecutiveTileFailures = 0;
+  bool _tilesUnavailable = false;
 
   @override
   void initState() {
@@ -91,14 +105,38 @@ class _TrackingMapHeroState extends State<TrackingMapHero>
 
   void _syncTileProvider() {
     final tiles = widget.loadTiles ? widget.tiles : null;
-    final signature = tiles == null
+    final dio = widget.tileDio;
+    final signature = tiles == null || dio == null
         ? null
         : '${tiles.urlTemplate}|${tiles.headers.entries.map((e) => '${e.key}=${e.value}').join('&')}';
     if (signature == _tileSignature) return;
     _tileProvider?.dispose();
     _tileSignature = signature;
-    _tileProvider =
-        tiles == null ? null : NetworkTileProvider(headers: tiles.headers);
+    _tileProvider = tiles == null || dio == null
+        ? null
+        : ApiTileProvider(
+            dio: dio,
+            // A copy: flutter_map injects its `User-Agent` into the provider's
+            // headers, and the model must stay the server's own values.
+            headers: Map<String, String>.of(tiles.headers),
+            onTileLoaded: _onTileLoaded,
+            onTileFailed: _onTileFailed,
+          );
+  }
+
+  void _onTileLoaded() {
+    _consecutiveTileFailures = 0;
+    if (_tilesUnavailable && mounted) {
+      setState(() => _tilesUnavailable = false);
+    }
+  }
+
+  void _onTileFailed() {
+    if (!mounted || _tilesUnavailable) return;
+    _consecutiveTileFailures++;
+    if (_consecutiveTileFailures >= 4) {
+      setState(() => _tilesUnavailable = true);
+    }
   }
 
   void _syncPulse() {
@@ -226,7 +264,8 @@ class _TrackingMapHeroState extends State<TrackingMapHero>
                   TileLayer(
                     urlTemplate: tiles.urlTemplate,
                     tileProvider: _tileProvider,
-                    userAgentPackageName: 'com.yallatalabat.customer',
+                    userAgentPackageName:
+                        'com.yallatalabat.yalla_talabat_customer',
                     minZoom: tiles.minZoom,
                     maxZoom: tiles.maxZoom,
                     maxNativeZoom: tiles.maxZoom.round(),
@@ -377,6 +416,32 @@ class _TrackingMapHeroState extends State<TrackingMapHero>
                 icon: Icons.my_location,
                 tooltip: l10n.recenterMap,
                 onTap: () => _fit(animated: true),
+              ),
+            ),
+          if (_tilesUnavailable)
+            PositionedDirectional(
+              start: AppSpacing.lg,
+              end: AppSpacing.lg,
+              bottom: AppSpacing.lg + 56,
+              child: Center(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceContainerLowest,
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
+                    border: Border.all(color: AppColors.borderHairline),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.md,
+                      vertical: AppSpacing.xs + 2,
+                    ),
+                    child: Text(
+                      l10n.mapUnavailable,
+                      style: AppTypography.labelSm
+                          .copyWith(color: AppColors.secondary),
+                    ),
+                  ),
+                ),
               ),
             ),
           Positioned(

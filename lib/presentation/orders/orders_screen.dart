@@ -4,19 +4,21 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/design/app_colors.dart';
 import '../../core/design/app_spacing.dart';
-import '../../core/design/app_typography.dart';
-import '../../core/formatting/formatters.dart';
 import '../../core/localization/l10n.dart';
-import '../../core/widgets/app_image.dart';
 import '../../core/widgets/app_scaffold.dart';
+import '../../core/widgets/flat_empty_state.dart';
 import '../../core/widgets/snack.dart';
 import '../../core/widgets/states.dart';
 import '../../data/models/orders.dart';
 import '../../state/orders_controller.dart';
 import '../../state/session_controller.dart';
 import '../shared/headers.dart';
+import 'widgets/order_card.dart';
+import 'widgets/orders_tabs.dart';
 
-/// My Orders tab: active and past orders with backend pagination.
+/// My Orders tab: active and past orders with backend pagination. Flat white
+/// canvas, segmented tabs, hairline order cards and one compact action per
+/// order, in line with the rest of the customer app.
 class OrdersScreen extends ConsumerStatefulWidget {
   const OrdersScreen({super.key});
 
@@ -43,7 +45,8 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
 
   void _onScroll() {
     if (!_scroll.hasClients) return;
-    if (_scroll.position.pixels < _scroll.position.maxScrollExtent - 240) return;
+    final threshold = _scroll.position.maxScrollExtent - 240;
+    if (_scroll.position.pixels < threshold) return;
     ref.read(ordersProvider(_tab).notifier).loadMore();
   }
 
@@ -62,6 +65,7 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
     return AppScaffold(
       header: SimpleHeader(
         title: l10n.myOrders,
+        subtitle: l10n.ordersSubtitle,
         showBack: false,
         actions: const [CartHeaderButton()],
       ),
@@ -69,16 +73,17 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
           ? () => ref.read(ordersProvider(_tab).notifier).refresh()
           : null,
       body: !signedIn
-          ? EmptyState(
+          ? FlatEmptyState(
               title: l10n.noOrders,
-              message: l10n.notAuthorized,
+              message: l10n.ordersGuestMessage,
               icon: Icons.receipt_long_outlined,
               actionLabel: l10n.signIn,
+              actionIcon: Icons.login,
               onAction: () => context.push('/login?next=/orders'),
             )
           : Column(
               children: [
-                _Tabs(
+                OrdersTabs(
                   activeLabel: l10n.activeOrders,
                   pastLabel: l10n.pastOrders,
                   active: _tab == OrdersTab.active,
@@ -88,35 +93,58 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
                 Expanded(
                   child: AsyncView(
                     value: orders,
-                    onRetry: () => ref.read(ordersProvider(_tab).notifier).refresh(),
+                    onRetry: () =>
+                        ref.read(ordersProvider(_tab).notifier).refresh(),
+                    loading: const _OrdersSkeleton(),
                     builder: (state) {
                       if (state.items.isEmpty) {
-                        return EmptyState(
-                          title: _tab == OrdersTab.active
-                              ? l10n.noActiveOrders
-                              : l10n.noOrders,
-                          icon: Icons.receipt_long_outlined,
+                        final active = _tab == OrdersTab.active;
+                        return FlatEmptyState(
+                          title:
+                              active ? l10n.noActiveOrders : l10n.noPastOrders,
+                          message: active
+                              ? l10n.noActiveOrdersMessage
+                              : l10n.noPastOrdersMessage,
+                          icon: active
+                              ? Icons.receipt_long_outlined
+                              : Icons.history,
                           actionLabel: l10n.browseRestaurants,
                           onAction: () => context.push('/restaurants'),
                         );
                       }
                       return ListView.separated(
                         controller: _scroll,
-                        padding: const EdgeInsets.all(AppSpacing.lg),
+                        padding: const EdgeInsets.fromLTRB(
+                          AppSpacing.gutter,
+                          AppSpacing.sm,
+                          AppSpacing.gutter,
+                          AppSpacing.xxxl,
+                        ),
                         itemCount: state.items.length + (state.hasMore ? 1 : 0),
-                        separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.md),
+                        separatorBuilder: (_, __) =>
+                            const SizedBox(height: AppSpacing.md),
                         itemBuilder: (context, index) {
                           if (index >= state.items.length) {
                             return const Padding(
-                              padding: EdgeInsets.symmetric(vertical: AppSpacing.lg),
-                              child: LoadingState(),
+                              padding: EdgeInsets.symmetric(
+                                vertical: AppSpacing.lg,
+                              ),
+                              child: Center(
+                                child: SizedBox(
+                                  width: 22,
+                                  height: 22,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2.2,
+                                  ),
+                                ),
+                              ),
                             );
                           }
-                          return _OrderCard(
-                            order: state.items[index],
-                            onTap: () =>
-                                context.push('/orders/${state.items[index].id}'),
-                            onReorder: () => _reorder(state.items[index]),
+                          final order = state.items[index];
+                          return OrderCard(
+                            order: order,
+                            onTap: () => context.push('/orders/${order.id}'),
+                            onReorder: () => _reorder(order),
                           );
                         },
                       );
@@ -136,93 +164,28 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
   }
 }
 
-class _Tabs extends StatelessWidget {
-  const _Tabs({
-    required this.activeLabel,
-    required this.pastLabel,
-    required this.active,
-    required this.onSelect,
-  });
-
-  final String activeLabel;
-  final String pastLabel;
-  final bool active;
-  final ValueChanged<bool> onSelect;
+/// Placeholder cards that keep the list layout stable while the first page of
+/// orders loads.
+class _OrdersSkeleton extends StatelessWidget {
+  const _OrdersSkeleton();
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(
-        AppSpacing.lg,
-        AppSpacing.md,
-        AppSpacing.lg,
-        AppSpacing.xs,
+    return ListView.separated(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.gutter,
+        AppSpacing.sm,
+        AppSpacing.gutter,
+        AppSpacing.xxxl,
       ),
-      padding: const EdgeInsets.all(AppSpacing.xs),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
-      ),
-      child: Row(
-        children: [
-          _tab(activeLabel, active, () => onSelect(true)),
-          _tab(pastLabel, !active, () => onSelect(false)),
-        ],
-      ),
-    );
-  }
-
-  Widget _tab(String label, bool selected, VoidCallback onTap) {
-    return Expanded(
-      child: InkWell(
-        borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
-        onTap: onTap,
-        child: Container(
-          height: 40,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: selected ? AppColors.surfaceContainerLowest : Colors.transparent,
-            borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
-            boxShadow: selected ? AppColors.cardShadow : null,
-          ),
-          child: Text(
-            label,
-            style: AppTypography.labelMd.copyWith(
-              color: selected ? AppColors.primary : AppColors.secondary,
-              fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _OrderCard extends StatelessWidget {
-  const _OrderCard({
-    required this.order,
-    required this.onTap,
-    required this.onReorder,
-  });
-
-  final OrderSummary order;
-  final VoidCallback onTap;
-  final VoidCallback onReorder;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = L10n.of(context);
-    final color = _statusColor(order.status);
-    return InkWell(
-      borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(AppSpacing.md),
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: 3,
+      separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.md),
+      itemBuilder: (_, __) => Container(
+        padding: const EdgeInsets.all(AppSpacing.md + 2),
         decoration: BoxDecoration(
-          color: AppColors.surfaceContainerLowest,
           borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-          border: Border.all(color: AppColors.surfaceContainerHigh),
-          boxShadow: AppColors.cardShadow,
+          border: Border.all(color: AppColors.borderHairline),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -230,123 +193,35 @@ class _OrderCard extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                AppImage(
-                  url: order.restaurantLogoUrl,
-                  width: 56,
-                  height: 56,
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                ),
+                const SkeletonBox(width: 48, height: 48, radius: 12),
                 const SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        order.restaurantName ?? '—',
-                        style: AppTypography.headlineSm.copyWith(fontSize: 16),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        '${order.reference} • ${Fmt.dateTime(order.placedAt)}',
-                        style: AppTypography.labelSm.copyWith(color: AppColors.secondary),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: AppSpacing.xs),
-                      _StatusChip(
-                        label: order.statusLabel(l10n.isArabic),
-                        color: color,
-                      ),
+                    children: const [
+                      SkeletonBox(width: 140, height: 12),
+                      SizedBox(height: 8),
+                      SkeletonBox(width: 90, height: 10),
+                      SizedBox(height: 10),
+                      SkeletonBox(width: 68, height: 16, radius: 6),
                     ],
                   ),
                 ),
                 const SizedBox(width: AppSpacing.sm),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      Fmt.money(order.totalMinor, currency: order.currency),
-                      style: AppTypography.labelLg.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                    Text(
-                      '${order.itemCount} ${l10n.items}',
-                      style: AppTypography.labelSm.copyWith(color: AppColors.secondary),
-                    ),
-                  ],
-                ),
+                const SkeletonBox(width: 64, height: 14),
               ],
             ),
-            const SizedBox(height: AppSpacing.sm),
+            const SizedBox(height: AppSpacing.md),
+            const SkeletonBox(height: 1, radius: 1),
+            const SizedBox(height: AppSpacing.md),
             Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: onTap,
-                    child: Text(
-                      order.isActive ? l10n.track : l10n.orderDetails,
-                    ),
-                  ),
-                ),
-                if (order.canRate) ...[
-                  const SizedBox(width: AppSpacing.sm),
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: onTap,
-                      child: Text(l10n.rateOrder),
-                    ),
-                  ),
-                ],
-                if (!order.isActive && order.canReorder) ...[
-                  const SizedBox(width: AppSpacing.sm),
-                  Expanded(
-                    child: FilledButton(
-                      onPressed: order.restaurantId == null ? null : onReorder,
-                      child: Text(l10n.reorder),
-                    ),
-                  ),
-                ],
+              children: const [
+                SkeletonBox(width: 72, height: 10),
+                Spacer(),
+                SkeletonBox(width: 92, height: 34, radius: 8),
               ],
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Color _statusColor(String status) {
-    return switch (status) {
-      'delivered' => AppColors.tertiary,
-      'cancelled' || 'failed_delivery' => AppColors.secondary,
-      'under_financial_review' => AppColors.warning,
-      _ => AppColors.primary,
-    };
-  }
-}
-
-class _StatusChip extends StatelessWidget {
-  const _StatusChip({required this.label, required this.color});
-
-  final String label;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Text(
-        label,
-        style: AppTypography.labelSm.copyWith(
-          color: color,
-          fontWeight: FontWeight.w700,
         ),
       ),
     );

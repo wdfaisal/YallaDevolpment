@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/config/env.dart';
@@ -9,6 +10,25 @@ import 'providers.dart';
 final mapsRepositoryProvider = Provider<MapsRepository>(
   (ref) => MapsRepository(ref.watch(apiClientProvider)),
 );
+
+/// Dedicated HTTP client for raster tiles.
+///
+/// It intentionally has no auth interceptor: every tile already carries the
+/// session header in [MapTiles.headers], and a secure-storage read per tile
+/// would be needlessly slow on Android. It is separate from [ApiClient] so a
+/// tile failure can never invalidate or retry an API call.
+final mapTileDioProvider = Provider<Dio>((ref) {
+  final dio = Dio(
+    BaseOptions(
+      connectTimeout: const Duration(seconds: 12),
+      receiveTimeout: const Duration(seconds: 20),
+      responseType: ResponseType.bytes,
+      headers: const {'Accept': 'image/png,image/*;q=0.8'},
+    ),
+  );
+  ref.onDispose(dio.close);
+  return dio;
+});
 
 /// Raster tile wiring for the tracking map.
 ///

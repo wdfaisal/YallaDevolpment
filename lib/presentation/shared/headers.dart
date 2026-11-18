@@ -47,10 +47,8 @@ class SimpleHeader extends StatelessWidget {
               icon: Icons.arrow_back,
               tooltip: L10n.of(context).back,
               onTap: onBack ?? () => Navigator.of(context).maybePop(),
-            )
-          else
-            const SizedBox(width: _backButtonSize),
-          const SizedBox(width: AppSpacing.sm),
+            ),
+          if (showBack) const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -75,7 +73,8 @@ class SimpleHeader extends StatelessWidget {
           ),
           ...actions,
           // Keeps the title balanced against the back button on the other edge.
-          if (actions.isEmpty) const SizedBox(width: _backButtonSize),
+          if (showBack && actions.isEmpty)
+            const SizedBox(width: _backButtonSize),
         ],
       ),
     );

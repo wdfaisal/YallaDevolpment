@@ -55,11 +55,22 @@ void main() {
       'addresses': const AddressesScreen(),
     };
 
+    // Screens with a screen-specific guest copy override the generic prompt.
+    final guestMessages = <String, String>{
+      'orders': const L10n(true).ordersGuestMessage,
+      'favorites': const L10n(true).favoritesGuestMessage,
+    };
+
     for (final entry in screens.entries) {
       testWidgets('${entry.key} shows the sign-in prompt', (tester) async {
         await tester.pumpWidget(_routerApp(entry.value));
         await tester.pumpAndSettle();
-        expect(find.text(const L10n(true).notAuthorized), findsOneWidget);
+        expect(
+          find.text(
+            guestMessages[entry.key] ?? const L10n(true).notAuthorized,
+          ),
+          findsOneWidget,
+        );
       });
     }
   });
