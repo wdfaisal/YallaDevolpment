@@ -6,6 +6,7 @@ import '../../../core/design/app_colors.dart';
 import '../../../core/design/app_spacing.dart';
 import '../../../core/design/app_typography.dart';
 import '../../../core/localization/l10n.dart';
+import '../../../data/models/maps.dart';
 import '../../../data/models/orders.dart';
 
 /// Full-bleed live map from the Stitch tracking design.
@@ -21,6 +22,9 @@ class TrackingMapHero extends StatefulWidget {
     required this.l10n,
     required this.height,
     required this.onBack,
+    this.onCancel,
+    this.tiles,
+    this.route,
     this.loadTiles = true,
     this.animatePulse = true,
   });
@@ -29,6 +33,20 @@ class TrackingMapHero extends StatefulWidget {
   final L10n l10n;
   final double height;
   final VoidCallback onBack;
+
+  /// Shows a cancel action in the title row while the order can still be
+  /// cancelled; `null` keeps the row to the back button and the title.
+  final VoidCallback? onCancel;
+
+  /// Server-owned tile wiring. `null` while the backend config loads, or when
+  /// the backend has no raster source; the map then draws without tiles and the
+  /// page keeps its honest "map unavailable" state instead of a fake map.
+  final MapTiles? tiles;
+
+  /// Real road route from the routing provider. When present the map draws the
+  /// provider geometry; when absent it falls back to a clearly dashed direct
+  /// line and the page shows no road distance.
+  final MapRoute? route;
 
   /// Disabled in widget tests so no network tile request is attempted.
   final bool loadTiles;
@@ -45,6 +63,14 @@ class _TrackingMapHeroState extends State<TrackingMapHero>
   final MapController _map = MapController();
   late final AnimationController _pulse;
 
+  /// One long-lived provider per tile template so the underlying HTTP client is
+  /// reused across rebuilds and disposed with the page.
+  NetworkTileProvider? _tileProvider;
+
+  /// Template plus authorisation of the provider currently alive. A new session
+  /// token must rebuild the provider even when the URL is unchanged.
+  String? _tileSignature;
+
   @override
   void initState() {
     super.initState();
@@ -53,12 +79,26 @@ class _TrackingMapHeroState extends State<TrackingMapHero>
       duration: const Duration(milliseconds: 1600),
     );
     _syncPulse();
+    _syncTileProvider();
   }
 
   @override
   void didUpdateWidget(covariant TrackingMapHero oldWidget) {
     super.didUpdateWidget(oldWidget);
     _syncPulse();
+    _syncTileProvider();
+  }
+
+  void _syncTileProvider() {
+    final tiles = widget.loadTiles ? widget.tiles : null;
+    final signature = tiles == null
+        ? null
+        : '${tiles.urlTemplate}|${tiles.headers.entries.map((e) => '${e.key}=${e.value}').join('&')}';
+    if (signature == _tileSignature) return;
+    _tileProvider?.dispose();
+    _tileSignature = signature;
+    _tileProvider =
+        tiles == null ? null : NetworkTileProvider(headers: tiles.headers);
   }
 
   void _syncPulse() {
@@ -74,6 +114,7 @@ class _TrackingMapHeroState extends State<TrackingMapHero>
   @override
   void dispose() {
     _pulse.dispose();
+    _tileProvider?.dispose();
     _map.dispose();
     super.dispose();
   }
@@ -104,8 +145,28 @@ class _TrackingMapHeroState extends State<TrackingMapHero>
     return points.toList();
   }
 
+  /// Provider geometry of the road route; empty when routing is unavailable.
+  List<LatLng> get _routePoints {
+    final route = widget.route;
+    if (route == null) return const [];
+    return [
+      for (final point in route.points) LatLng(point.lat, point.lng),
+    ];
+  }
+
+  /// What the camera must contain: the whole road route plus the captain, or
+  /// the markers while no route is available.
+  List<LatLng> get _fitPoints {
+    final routePoints = _routePoints;
+    if (routePoints.length < 2) return _points;
+    final points = <LatLng>{...routePoints};
+    final driver = _driver;
+    if (driver != null) points.add(driver);
+    return points.toList();
+  }
+
   void _fit({bool animated = false}) {
-    final points = _points;
+    final points = _fitPoints;
     if (points.isEmpty) return;
     if (points.length == 1) {
       _map.move(points.first, 15);
@@ -125,10 +186,14 @@ class _TrackingMapHeroState extends State<TrackingMapHero>
     final l10n = widget.l10n;
     final topInset = MediaQuery.paddingOf(context).top;
     final points = _points;
-    final center = points.isEmpty ? const LatLng(15.55, 32.55) : points.first;
+    final fitPoints = _fitPoints;
+    final routePoints = _routePoints;
+    final center =
+        fitPoints.isEmpty ? const LatLng(15.55, 32.55) : fitPoints.first;
     final driver = _driver;
     final restaurant = _restaurant;
     final destination = _destination;
+    final tiles = widget.loadTiles ? widget.tiles : null;
 
     return SizedBox(
       height: widget.height,
@@ -143,9 +208,9 @@ class _TrackingMapHeroState extends State<TrackingMapHero>
               options: MapOptions(
                 initialCenter: center,
                 initialZoom: 14,
-                initialCameraFit: points.length > 1
+                initialCameraFit: fitPoints.length > 1
                     ? CameraFit.bounds(
-                        bounds: LatLngBounds.fromPoints(points),
+                        bounds: LatLngBounds.fromPoints(fitPoints),
                         padding: const EdgeInsets.fromLTRB(72, 96, 72, 96),
                       )
                     : null,
@@ -157,18 +222,33 @@ class _TrackingMapHeroState extends State<TrackingMapHero>
                 ),
               ),
               children: [
-                if (widget.loadTiles)
+                if (tiles != null && _tileProvider != null)
                   TileLayer(
-                    urlTemplate:
-                        'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
-                    subdomains: const ['a', 'b', 'c', 'd'],
+                    urlTemplate: tiles.urlTemplate,
+                    tileProvider: _tileProvider,
                     userAgentPackageName: 'com.yallatalabat.customer',
-                    maxNativeZoom: 19,
-                    maxZoom: 19,
+                    minZoom: tiles.minZoom,
+                    maxZoom: tiles.maxZoom,
+                    maxNativeZoom: tiles.maxZoom.round(),
                   ),
-                if (restaurant != null && destination != null)
+                if (routePoints.length > 1)
                   PolylineLayer(
                     polylines: [
+                      // The provider's road geometry, not a straight line.
+                      Polyline(
+                        points: routePoints,
+                        strokeWidth: 6,
+                        color: AppColors.primary,
+                        borderColor: AppColors.surfaceContainerLowest,
+                        borderStrokeWidth: 2,
+                      ),
+                    ],
+                  )
+                else if (restaurant != null && destination != null)
+                  PolylineLayer(
+                    polylines: [
+                      // Routing is unavailable: show an explicitly dashed
+                      // direct line and never claim it is a road route.
                       Polyline(
                         points: [restaurant, destination],
                         color: AppColors.surfaceContainerHigh,
@@ -177,30 +257,6 @@ class _TrackingMapHeroState extends State<TrackingMapHero>
                           segments: const [8, 6],
                         ),
                       ),
-                      if (driver != null)
-                        Polyline(
-                          points: [restaurant, driver],
-                          strokeWidth: 5,
-                          borderColor: AppColors.surfaceContainerLowest,
-                          borderStrokeWidth: 2,
-                          gradientColors: const [
-                            AppColors.primary,
-                            AppColors.tertiary,
-                          ],
-                          colorsStop: const [0, 1],
-                        )
-                      else
-                        Polyline(
-                          points: [restaurant, destination],
-                          strokeWidth: 5,
-                          borderColor: AppColors.surfaceContainerLowest,
-                          borderStrokeWidth: 2,
-                          gradientColors: const [
-                            AppColors.primary,
-                            AppColors.tertiary,
-                          ],
-                          colorsStop: const [0, 1],
-                        ),
                     ],
                   ),
                 MarkerLayer(
@@ -283,16 +339,25 @@ class _TrackingMapHeroState extends State<TrackingMapHero>
             child: Row(
               children: [
                 _MapCircleButton(
-                  icon: Directionality.of(context) == TextDirection.rtl
-                      ? Icons.arrow_forward
-                      : Icons.arrow_back,
+                  // `arrow_back` mirrors to a right-pointing arrow in RTL.
+                  icon: Icons.arrow_back,
                   tooltip: MaterialLocalizations.of(context).backButtonTooltip,
                   onTap: widget.onBack,
                 ),
                 const SizedBox(width: AppSpacing.sm),
-                Flexible(
-                  child: _TitlePill(label: l10n.trackOrderTitle),
+                Expanded(
+                  child: Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: _TitlePill(label: l10n.trackOrderTitle),
+                  ),
                 ),
+                if (widget.onCancel != null) ...[
+                  const SizedBox(width: AppSpacing.xs),
+                  _HeaderCancelAction(
+                    label: l10n.cancelOrder,
+                    onTap: widget.onCancel!,
+                  ),
+                ],
               ],
             ),
           ),
@@ -319,7 +384,9 @@ class _TrackingMapHeroState extends State<TrackingMapHero>
             bottom: 2,
             child: IgnorePointer(
               child: Text(
-                l10n.mapAttribution,
+                // The provider attribution is server-owned; the localized
+                // fallback only covers the moment before the config arrives.
+                tiles?.attribution ?? l10n.mapAttribution,
                 style: AppTypography.labelSm.copyWith(
                   fontSize: 8,
                   color: AppColors.secondary,
@@ -604,6 +671,7 @@ class _MapLabel extends StatelessWidget {
   }
 }
 
+/// Page title pill floating over the map, matching the flat white overlays.
 class _TitlePill extends StatelessWidget {
   const _TitlePill({required this.label});
 
@@ -626,6 +694,60 @@ class _TitlePill extends StatelessWidget {
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         style: AppTypography.headlineSm,
+      ),
+    );
+  }
+}
+
+/// Outlined rectangular cancel action pinned to the left edge of the title
+/// row: transparent fill, hairline red border and the small red label.
+class _HeaderCancelAction extends StatelessWidget {
+  const _HeaderCancelAction({required this.label, required this.onTap});
+
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      type: MaterialType.transparency,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+        onTap: onTap,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(
+            minHeight: AppSpacing.minTapTarget,
+            minWidth: AppSpacing.minTapTarget,
+          ),
+          child: Center(
+            widthFactor: 1,
+            heightFactor: 1,
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.sm,
+                vertical: AppSpacing.xs,
+              ),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+                border: Border.all(color: AppColors.error),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.close, size: 14, color: AppColors.error),
+                  const SizedBox(width: 2),
+                  Text(
+                    label,
+                    maxLines: 1,
+                    style: AppTypography.labelMd.copyWith(
+                      color: AppColors.error,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

@@ -13,8 +13,10 @@ class RestaurantHero extends StatelessWidget {
 
   static const double height = 288;
 
-  /// How far the meta card is lifted over the hero image.
-  static const double metaOverlap = 80;
+  /// How far the meta card is lifted over the hero image. The card sits high
+  /// enough that the restaurant details are readable without scrolling, while
+  /// the photo still fills the area behind the top bar.
+  static const double metaOverlap = 128;
 
   @override
   Widget build(BuildContext context) {

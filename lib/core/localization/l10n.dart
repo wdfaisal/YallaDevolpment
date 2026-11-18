@@ -684,6 +684,8 @@ class L10n {
         'No map coordinates are available for this order',
       );
   String get mapAttribution => '© OpenStreetMap';
+  String get routeDistanceLabel => _t('مسافة الطريق', 'Road distance');
+  String get routeDurationLabel => _t('مدة الطريق', 'Road time');
   String get fullReceipt => _t('الفاتورة الكاملة', 'Full receipt');
   String get deliveredAndReceived =>
       _t('تم التسليم والاستلام', 'Delivered & received');

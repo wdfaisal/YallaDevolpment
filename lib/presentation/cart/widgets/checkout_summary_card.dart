@@ -36,6 +36,14 @@ class CheckoutSummaryCard extends StatelessWidget {
     final vatLabel = vatPercent == vatPercent.roundToDouble()
         ? vatPercent.toStringAsFixed(0)
         : vatPercent.toStringAsFixed(1);
+    // The backend reports `subtotalMinor` with the offer prices already applied
+    // and `subtotalOriginalMinor` as the same subtotal before the offer. Never
+    // print a pre-offer subtotal below the amount actually charged, in case an
+    // older payload omits the field.
+    final originalSubtotal =
+        currentQuote.subtotalOriginalMinor >= currentQuote.subtotalMinor
+            ? currentQuote.subtotalOriginalMinor
+            : currentQuote.subtotalMinor;
 
     return CheckoutSectionCard(
       child: Column(
@@ -43,17 +51,14 @@ class CheckoutSummaryCard extends StatelessWidget {
         children: [
           Text(l10n.priceDetails, style: AppTypography.headlineSm),
           const SizedBox(height: AppSpacing.sm),
+          // Invoice order: pre-offer subtotal, then the offer discount as its
+          // own row. `subtotalMinor` is already discounted, so printing it here
+          // *and* the discount row would subtract the same money twice and the
+          // column would not add up to the final total.
           _PriceRow(
             label: l10n.subtotal,
-            value: Fmt.moneyExact(currentQuote.subtotalMinor),
+            value: Fmt.moneyExact(originalSubtotal),
             currency: currency,
-            original: currentQuote.subtotalOriginalMinor >
-                    currentQuote.subtotalMinor
-                ? Fmt.moneyExact(
-                    currentQuote.subtotalOriginalMinor,
-                    currency: currency,
-                  )
-                : null,
           ),
           if (currentQuote.offerDiscountMinor > 0)
             _PriceRow(

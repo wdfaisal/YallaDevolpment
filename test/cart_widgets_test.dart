@@ -123,6 +123,8 @@ PaymentMethodOption _method(
 
 CartQuote _quote({
   int subtotalMinor = 7000,
+  int? subtotalOriginalMinor,
+  int offerDiscountMinor = 0,
   int deliveryFeeMinor = 600,
   int deliveryFeeOriginalMinor = 1500,
   int discountMinor = 2100,
@@ -133,6 +135,8 @@ CartQuote _quote({
   ),
   List<PaymentMethodOption>? paymentMethods,
   bool freeDeliveryApplied = true,
+  int vatMinor = 825,
+  int totalMinor = 6325,
 }) {
   return CartQuote(
     currency: 'SAR',
@@ -142,13 +146,13 @@ CartQuote _quote({
     lines: [_line()],
     itemCount: 1,
     subtotalMinor: subtotalMinor,
-    subtotalOriginalMinor: subtotalMinor,
-    offerDiscountMinor: 0,
+    subtotalOriginalMinor: subtotalOriginalMinor ?? subtotalMinor,
+    offerDiscountMinor: offerDiscountMinor,
     deliveryFeeMinor: deliveryFeeMinor,
     deliveryFeeOriginalMinor: deliveryFeeOriginalMinor,
     discountMinor: discountMinor,
-    vatMinor: 825,
-    totalMinor: 6325,
+    vatMinor: vatMinor,
+    totalMinor: totalMinor,
     minOrderMinor: 0,
     meetsMinimum: true,
     freeDeliveryApplied: freeDeliveryApplied,
@@ -472,6 +476,50 @@ void main() {
       expect(find.text('الإجمالي النهائي'), findsOneWidget);
       expect(find.text('شامل الضريبة وكافة الرسوم'), findsOneWidget);
       expect(find.text('63.25'), findsOneWidget);
+    });
+
+    testWidgets('lists an offer discount once so the column adds up', (
+      tester,
+    ) async {
+      // 60.00 pre-offer subtotal − 5.00 offer + 6.00 delivery = 61.00.
+      final quote = _quote(
+        subtotalMinor: 5500,
+        subtotalOriginalMinor: 6000,
+        offerDiscountMinor: 500,
+        discountMinor: 0,
+        coupon: null,
+        vatMinor: 0,
+        totalMinor: 6100,
+      );
+      await tester.pumpWidget(
+        testApp(
+          Scaffold(
+            body: SingleChildScrollView(
+              child: CheckoutSummaryCard(quote: quote, l10n: _l10n),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('المجموع الفرعي'), findsOneWidget);
+      expect(find.text('60.00'), findsOneWidget);
+      expect(find.text('خصم العروض'), findsOneWidget);
+      expect(find.text('-5.00'), findsOneWidget);
+      expect(find.text('6.00'), findsOneWidget);
+      expect(find.text('61.00'), findsOneWidget);
+
+      // The already-discounted subtotal must not be printed as a second row:
+      // that made the visible rows subtract the offer twice.
+      expect(find.text('55.00'), findsNothing);
+
+      // The only struck-through amount left is the delivery fee's original
+      // price; the subtotal is now a plain pre-offer value.
+      final struck = tester
+          .widgetList<Text>(find.byType(Text))
+          .where((text) => text.style?.decoration == TextDecoration.lineThrough)
+          .map((text) => text.data)
+          .toList();
+      expect(struck, ['15.00 SAR']);
     });
   });
 

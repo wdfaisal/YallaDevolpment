@@ -237,7 +237,11 @@ void main() {
     final controller = tester
         .widget<CustomScrollView>(find.byType(CustomScrollView))
         .controller!;
-    controller.jumpTo(420);
+    // Scroll just past the meta card so the in-flow strip slides under the bar
+    // while it is still built; a fixed offset would break whenever the card
+    // height changes.
+    final cardBottom = tester.getBottomLeft(find.byType(RestaurantMetaCard)).dy;
+    controller.jumpTo(cardBottom + 20);
     await tester.pumpAndSettle();
 
     final bars = find.byType(RestaurantTabsBar);

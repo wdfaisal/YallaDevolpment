@@ -16,13 +16,16 @@ import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/snack.dart';
 import '../../core/widgets/states.dart';
 import '../../data/api/api_exception.dart';
+import '../../data/models/maps.dart';
 import '../../data/models/orders.dart';
+import '../../state/maps_controller.dart';
 import '../../state/orders_controller.dart';
 import '../shared/sheets.dart';
 import 'order_detail_dialogs.dart';
 import 'widgets/tracking_driver_card.dart';
 import 'widgets/tracking_map_hero.dart';
 import 'widgets/tracking_order_summary.dart';
+import 'widgets/tracking_route_card.dart';
 import 'widgets/tracking_safety_card.dart';
 import 'widgets/tracking_timeline.dart';
 
@@ -86,6 +89,11 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
     final summary = detail.summary;
     final driver = detail.tracking.driver;
     final rating = detail.rating;
+    // The backend owns the raster provider; the app only receives an
+    // authenticated tile template. `null` while loading or when the server has
+    // no tile source, so the map never falls back to a hardcoded provider.
+    final tiles = ref.watch(mapTilesProvider).valueOrNull;
+    final route = _routeFor(detail);
     return ListView(
       padding: EdgeInsets.zero,
       physics: const AlwaysScrollableScrollPhysics(),
@@ -94,7 +102,12 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
           detail: detail,
           l10n: l10n,
           height: _mapHeight,
+          tiles: tiles,
+          route: route,
           onBack: () => context.pop(),
+          onCancel: summary.canCancel
+              ? () => _cancel(context, l10n, summary.id)
+              : null,
         ),
         Transform.translate(
           offset: const Offset(0, -_contentOverlap),
@@ -109,6 +122,10 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 TrackingTimeline(detail: detail, l10n: l10n),
+                if (route != null) ...[
+                  const SizedBox(height: AppSpacing.lg),
+                  TrackingRouteCard(route: route, l10n: l10n),
+                ],
                 const SizedBox(height: AppSpacing.lg),
                 if (driver != null) ...[
                   TrackingDriverCard(
@@ -141,6 +158,17 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
     );
   }
 
+  /// The road route for this order, or null while it loads / when the backend
+  /// has no routing provider. Only the pickup→drop leg is routed; a missing
+  /// coordinate means there is nothing honest to draw.
+  MapRoute? _routeFor(OrderDetail detail) {
+    final origin = detail.restaurantPosition;
+    final destination = detail.deliveryPosition;
+    if (origin == null || destination == null) return null;
+    final query = MapRouteQuery(origin: origin, destination: destination);
+    return ref.watch(mapRouteProvider(query)).valueOrNull;
+  }
+
   List<Widget> _actions(
     BuildContext context,
     L10n l10n,
@@ -162,13 +190,6 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
           ),
           icon: const Icon(Icons.star_outline, size: 20),
           label: Text(l10n.rateOrder),
-        ),
-      if (summary.canCancel)
-        OutlinedButton.icon(
-          onPressed: () => _cancel(context, l10n, summary.id),
-          style: _outlineStyle(AppColors.error),
-          icon: const Icon(Icons.close, size: 18),
-          label: Text(l10n.cancelOrder),
         ),
       if (summary.canReorder && summary.restaurantId != null)
         OutlinedButton.icon(
@@ -206,11 +227,7 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
     return OutlinedButton.styleFrom(
       foregroundColor: color,
       minimumSize: const Size.fromHeight(48),
-      side: BorderSide(
-        color: color == AppColors.error
-            ? AppColors.error
-            : AppColors.borderHairline,
-      ),
+      side: const BorderSide(color: AppColors.borderHairline),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
       ),

@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:yalla_talabat_customer/core/design/app_colors.dart';
+import 'package:yalla_talabat_customer/core/design/app_spacing.dart';
 import 'package:yalla_talabat_customer/core/localization/l10n.dart';
 import 'package:yalla_talabat_customer/data/models/cart.dart';
+import 'package:yalla_talabat_customer/data/models/maps.dart';
 import 'package:yalla_talabat_customer/data/models/orders.dart';
 import 'package:yalla_talabat_customer/presentation/orders/widgets/tracking_driver_card.dart';
 import 'package:yalla_talabat_customer/presentation/orders/widgets/tracking_map_hero.dart';
 import 'package:yalla_talabat_customer/presentation/orders/widgets/tracking_order_summary.dart';
+import 'package:yalla_talabat_customer/presentation/orders/widgets/tracking_route_card.dart';
 import 'package:yalla_talabat_customer/presentation/orders/widgets/tracking_safety_card.dart';
 import 'package:yalla_talabat_customer/presentation/orders/widgets/tracking_timeline.dart';
 
@@ -160,6 +165,87 @@ void main() {
 
     await tester.tap(find.byTooltip(l10n.recenterMap));
     expect(back, 0);
+    // Without a cancellable order the header row keeps just the title.
+    expect(find.text(l10n.cancelOrder), findsNothing);
+    // The back button uses the auto-mirrored arrow, which points right in RTL.
+    final backIcon = find.byIcon(Icons.arrow_back);
+    expect(backIcon, findsOneWidget);
+    expect(
+      Directionality.of(tester.element(backIcon)),
+      TextDirection.rtl,
+    );
+    _expectNoBoxShadows(tester);
+  });
+
+  testWidgets('the title keeps its pill and cancel shares its row, smaller', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 640);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    var cancelled = 0;
+    await tester.pumpWidget(
+      testApp(
+        Scaffold(
+          body: TrackingMapHero(
+            detail: _detail(),
+            l10n: l10n,
+            height: 360,
+            onBack: () {},
+            onCancel: () => cancelled++,
+            loadTiles: false,
+            animatePulse: false,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(tester.takeException(), isNull);
+    final title = find.text(l10n.trackOrderTitle);
+    expect(title, findsOneWidget);
+    // The title sits on a flat white pill again.
+    final pill = tester.widget<Container>(
+      find.ancestor(of: title, matching: find.byType(Container)).first,
+    );
+    expect(
+      (pill.decoration! as BoxDecoration).color,
+      AppColors.surfaceContainerLowest,
+    );
+
+    final cancel = find.text(l10n.cancelOrder);
+    expect(cancel, findsOneWidget);
+    // Cancel uses a smaller label than the title and stays on its row.
+    expect(
+      tester.widget<Text>(cancel).style!.fontSize,
+      lessThan(tester.widget<Text>(title).style!.fontSize!),
+    );
+    expect(
+      tester.getCenter(cancel).dy,
+      moreOrLessEquals(tester.getCenter(title).dy, epsilon: 1),
+    );
+
+    // Outlined rectangle: transparent fill with a red border, pinned to the
+    // left edge of the screen (the end side in RTL).
+    final boxFinder =
+        find.ancestor(of: cancel, matching: find.byType(Container)).first;
+    final box = tester.widget<Container>(boxFinder);
+    final boxDecoration = box.decoration! as BoxDecoration;
+    expect(boxDecoration.color, isNull);
+    expect(boxDecoration.border, isNotNull);
+    expect(
+      boxDecoration.borderRadius,
+      BorderRadius.circular(AppSpacing.radiusSm),
+    );
+    expect(
+      tester.getTopLeft(boxFinder).dx,
+      moreOrLessEquals(AppSpacing.lg, epsilon: 1),
+    );
+
+    await tester.tap(cancel);
+    expect(cancelled, 1);
     _expectNoBoxShadows(tester);
   });
 
@@ -206,6 +292,67 @@ void main() {
     );
 
     expect(find.text(l10n.mapUnavailable), findsOneWidget);
+    _expectNoBoxShadows(tester);
+  });
+
+  testWidgets('map hero draws the provider road geometry, not a straight line',
+      (
+    tester,
+  ) async {
+    const route = MapRoute(
+      distanceKm: 13.89,
+      durationMin: 22,
+      points: [
+        GeoPoint(lat: 15.5075, lng: 32.5606),
+        GeoPoint(lat: 15.5200, lng: 32.5450),
+        GeoPoint(lat: 15.5350, lng: 32.5200),
+        GeoPoint(lat: 15.5499, lng: 32.5000),
+      ],
+    );
+    await tester.pumpWidget(
+      testApp(
+        Scaffold(
+          body: TrackingMapHero(
+            detail: _detail(),
+            l10n: l10n,
+            height: 360,
+            onBack: () {},
+            loadTiles: false,
+            animatePulse: false,
+            route: route,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    final layer = tester.widget<PolylineLayer>(find.byType(PolylineLayer));
+    expect(layer.polylines, hasLength(1));
+    // The polyline follows every provider point instead of the two markers.
+    expect(layer.polylines.single.points, hasLength(route.points.length));
+  });
+
+  testWidgets('route card shows the provider distance and time', (
+    tester,
+  ) async {
+    const route = MapRoute(
+      distanceKm: 13.89,
+      durationMin: 22,
+      points: [
+        GeoPoint(lat: 15.5075, lng: 32.5606),
+        GeoPoint(lat: 15.5499, lng: 32.5000),
+      ],
+    );
+    await tester.pumpWidget(
+      testApp(
+        Scaffold(body: TrackingRouteCard(route: route, l10n: l10n)),
+      ),
+    );
+
+    expect(find.text(l10n.routeDistanceLabel), findsOneWidget);
+    expect(find.text('13.9 ${l10n.km}'), findsOneWidget);
+    expect(find.text(l10n.routeDurationLabel), findsOneWidget);
+    expect(find.text('22 ${l10n.minutesLong}'), findsOneWidget);
     _expectNoBoxShadows(tester);
   });
 
